@@ -1,21 +1,99 @@
 /* ===========================================================
-   DataVault — interactions
+   InvestorVault — interactions
    =========================================================== */
 
-/* >>> SET THIS after deploying the Google Apps Script (see README) <<< */
-const ENDPOINT_URL = ""; // e.g. "https://script.google.com/macros/s/AKfy.../exec"
+/* Admin password to manage reviews (click the footer logo). */
+const ADMIN_PASSWORD = "Fundo@987654";
+
+const REVIEWS_KEY = "iv_reviews";
+const THEME_KEY = "iv_theme";
+const CONTACT_KEY = "iv_contact";
+
+/* Default contact details — admin can change these from the dashboard. */
+const DEFAULT_CONTACT = { whatsapp: "918527738977", email: "hello@investorvault.in" };
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("year").textContent = new Date().getFullYear();
 
-  /* ---- animated stat counters ---- */
-  const counters = document.querySelectorAll(".stat__num");
+  /* =========================================================
+     CONTACT SETTINGS (WhatsApp + email) — editable in admin
+     ========================================================= */
+  const loadContact = () => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(CONTACT_KEY) || "{}");
+      return { ...DEFAULT_CONTACT, ...saved };
+    } catch (e) {
+      return { ...DEFAULT_CONTACT };
+    }
+  };
+  let contact = loadContact();
+
+  const waLink = (text) =>
+    "https://wa.me/" + contact.whatsapp + "?text=" + encodeURIComponent(text);
+  const phoneDisplay = () => "+" + contact.whatsapp;
+
+  const applyContact = () => {
+    const fab = document.getElementById("waFab");
+    if (fab) fab.href = waLink("Hi InvestorVault, I'd like to request a dataset.");
+    const mail = document.getElementById("subMailDisplay");
+    if (mail) mail.textContent = contact.email;
+  };
+  applyContact();
+
+  /* =========================================================
+     CATALOG CARD COUNTS — editable in admin, saved per device
+     ========================================================= */
+  const COUNTS_KEY = "iv_card_counts";
+  const catalogCards = document.querySelectorAll(".catalog .card");
+  const cardKey = (card) => card.dataset.cat || "";
+
+  const loadCounts = () => {
+    try { return JSON.parse(localStorage.getItem(COUNTS_KEY) || "{}"); }
+    catch (e) { return {}; }
+  };
+  let cardCounts = loadCounts();
+
+  const applyCounts = () => {
+    catalogCards.forEach((card) => {
+      const el = card.querySelector(".card__count");
+      const saved = cardCounts[cardKey(card)];
+      if (el && saved != null && saved !== "") el.textContent = saved;
+    });
+  };
+  applyCounts();
+
+  /* =========================================================
+     THEME TOGGLE (cycles through palettes)
+     ========================================================= */
+  const themeSwatches = document.querySelectorAll(".theme-pick");
+  const applyTheme = (id) => {
+    if (id) document.documentElement.setAttribute("data-theme", id);
+    else document.documentElement.removeAttribute("data-theme");
+    themeSwatches.forEach((b) =>
+      b.classList.toggle("is-active", (b.dataset.theme || "") === id)
+    );
+  };
+  applyTheme(localStorage.getItem(THEME_KEY) || "");
+  themeSwatches.forEach((b) => {
+    b.addEventListener("click", () => {
+      const id = b.dataset.theme || "";
+      applyTheme(id);
+      localStorage.setItem(THEME_KEY, id);
+    });
+  });
+
+  /* =========================================================
+     ANIMATED STAT COUNTERS
+     ========================================================= */
+  const counters = document.querySelectorAll(".stat__num[data-count]");
   const animate = (el) => {
-    const target = +el.dataset.count;
+    const target = parseFloat(el.dataset.count);
     const suffix = el.dataset.suffix || "";
+    const decimals = parseInt(el.dataset.decimals || "0", 10);
     const dur = 1400;
     const start = performance.now();
     const fmt = (n) => {
+      if (decimals > 0) return n.toFixed(decimals);
       if (target >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
       if (target >= 1000) return Math.round(n / 1000) + "k";
       return Math.round(n).toString();
@@ -29,9 +107,11 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(tick);
   };
 
-  /* ---- scroll reveal + counter trigger ---- */
+  /* =========================================================
+     SCROLL REVEAL + COUNTER TRIGGER
+     ========================================================= */
   const revealEls = document.querySelectorAll(
-    ".section__head, .card, .step, .trust__copy, .trust__cardstack, .hero__panel, .faq details, .form"
+    ".section__head, .card, .step, .trust__copy, .trust__cardstack, .hero__panel, .faq details, .reviews"
   );
   revealEls.forEach((el) => el.classList.add("reveal"));
 
@@ -40,9 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
       entries.forEach((e) => {
         if (e.isIntersecting) {
           e.target.classList.add("in");
-          if (e.target.classList.contains("hero__panel")) {
-            counters.forEach(animate);
-          }
+          if (e.target.classList.contains("hero__panel")) counters.forEach(animate);
           io.unobserve(e.target);
         }
       });
@@ -50,30 +128,25 @@ document.addEventListener("DOMContentLoaded", () => {
     { threshold: 0.15 }
   );
   revealEls.forEach((el) => io.observe(el));
-
-  // ensure hero counters fire even if panel already visible
   if (counters.length) {
     const panel = document.querySelector(".hero__panel");
     if (panel) io.observe(panel);
   }
 
-  /* ---- catalog card → prefill form category + scroll ---- */
+  /* =========================================================
+     CATALOG CARD → OPEN REQUEST POPUP (prefilled category)
+     ========================================================= */
   const categorySelect = document.getElementById("category");
   document.querySelectorAll(".card__btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const cat = btn.closest(".card").dataset.cat
-        .replace(/&amp;/g, "&");
-      if (categorySelect) {
-        [...categorySelect.options].forEach((o) => {
-          if (o.text.replace(/&amp;/g, "&") === cat) categorySelect.value = o.value;
-        });
-      }
-      document.getElementById("request").scrollIntoView({ behavior: "smooth" });
-      setTimeout(() => document.getElementById("name").focus(), 600);
+      const cat = btn.closest(".card").dataset.cat.replace(/&amp;/g, "&");
+      openRequest(cat);
     });
   });
 
-  /* ---- form validation + submit ---- */
+  /* =========================================================
+     REQUEST FORM → WHATSAPP
+     ========================================================= */
   const form = document.getElementById("dataRequestForm");
   const note = document.getElementById("formNote");
   const submitBtn = document.getElementById("submitBtn");
@@ -99,7 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return ok;
   };
 
-  // clear invalid state on input
   form.querySelectorAll("input,select,textarea").forEach((el) => {
     el.addEventListener("input", () => {
       const f = el.closest(".field") || el.closest(".consent");
@@ -107,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  form.addEventListener("submit", async (e) => {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
     setNote("");
 
@@ -119,45 +191,653 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const data = {
-      name: form.name.value.trim(),
-      phone: form.phone.value.trim(),
-      email: form.email.value.trim(),
-      occupation: form.occupation.value.trim(),
-      category: form.category.value,
-      quantity: form.quantity.value.trim(),
-      region: form.region.value.trim(),
-      budget: form.budget.value.trim(),
-      requirement: form.requirement.value.trim(),
-      page: location.href,
+    const v = (n) => form[n].value.trim();
+    const lines = [
+      "*New data request — InvestorVault*",
+      "",
+      `*Name:* ${v("name")}`,
+      `*WhatsApp:* ${v("phone")}`,
+      `*Email:* ${v("email")}`,
+      `*Occupation/Company:* ${v("occupation")}`,
+      `*Category:* ${form.category.value}`,
+      v("quantity") && `*Quantity:* ${v("quantity")}`,
+      v("region") && `*Region:* ${v("region")}`,
+      v("budget") && `*Budget:* ${v("budget")}`,
+      "",
+      `*Requirement:*`,
+      v("requirement"),
+    ].filter(Boolean);
+
+    const url = waLink(lines.join("\n"));
+
+    window.open(url, "_blank", "noopener");
+    setNote("Opening WhatsApp… if nothing happens, message us at " + phoneDisplay() + ".", "ok");
+    setTimeout(() => { if (requestSheet) closeSheet(requestSheet); }, 1700);
+  });
+
+  /* =========================================================
+     REVIEWS — storage helpers
+     ========================================================= */
+  const DEFAULT_REVIEWS = [
+    { id: "seed-1", name: "Rohan Mehta", role: "Founder, Bright Realty", rating: 5, approved: true,
+      text: "The HNI dataset was clean and the numbers actually connected. Same-day delivery as promised — this is the only data vendor we've kept." },
+    { id: "seed-2", name: "Priya Nair", role: "Wealth Manager, Mumbai", rating: 5, approved: true,
+      text: "Verified emails and phones, no junk rows. My team's outreach reply rate jumped noticeably. Worth every rupee." },
+    { id: "seed-3", name: "Arjun S.", role: "Sales Lead, B2B SaaS", rating: 4, approved: true,
+      text: "Great quality and honest about counts before we paid. Custom IT-buyer filters were spot on for our campaign." },
+  ];
+
+  const loadReviews = () => {
+    try {
+      const raw = localStorage.getItem(REVIEWS_KEY);
+      if (!raw) {
+        localStorage.setItem(REVIEWS_KEY, JSON.stringify(DEFAULT_REVIEWS));
+        return [...DEFAULT_REVIEWS];
+      }
+      return JSON.parse(raw);
+    } catch (e) {
+      return [...DEFAULT_REVIEWS];
+    }
+  };
+  const saveReviews = (list) => localStorage.setItem(REVIEWS_KEY, JSON.stringify(list));
+  let reviews = loadReviews();
+
+  const starString = (n) => {
+    let s = "";
+    for (let i = 1; i <= 5; i++) s += i <= n ? "★" : "☆";
+    return s;
+  };
+  const starHTML = (n) => {
+    let s = "";
+    for (let i = 1; i <= 5; i++) s += i <= n ? "★" : '<span class="off">★</span>';
+    return s;
+  };
+
+  /* =========================================================
+     GENERIC CAROUSEL  (used by reviews + screenshots)
+     ========================================================= */
+  function makeSlider({ track, dots, prev, next, perView, slideSelector, autoMs }) {
+    let idx = 0;
+    let timer = null;
+    const slideCount = () => track.querySelectorAll(slideSelector).length;
+    const maxIdx = () => Math.max(0, slideCount() - perView());
+
+    const restart = () => {
+      if (!autoMs) return;
+      clearInterval(timer);
+      timer = setInterval(() => go(idx + 1 > maxIdx() ? 0 : idx + 1), autoMs);
     };
 
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Sending…";
+    const paintDots = () =>
+      dots.querySelectorAll("button").forEach((d, di) => d.classList.toggle("is-active", di === idx));
 
-    try {
-      if (!ENDPOINT_URL) {
-        // Demo mode — no backend wired yet
-        await new Promise((r) => setTimeout(r, 900));
-        console.log("[DataVault demo] request payload:", data);
-        form.reset();
-        setNote("Demo mode: request captured locally. Wire ENDPOINT_URL to go live.", "ok");
-      } else {
-        await fetch(ENDPOINT_URL, {
-          method: "POST",
-          mode: "no-cors", // Apps Script web app
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(data),
-        });
-        form.reset();
-        setNote("Thank you! Your request is in — we'll reply within one business day.", "ok");
+    const go = (i) => {
+      const max = maxIdx();
+      idx = Math.min(Math.max(i, 0), max);
+      const step = 100 / perView();
+      track.style.transform = `translateX(-${idx * step}%)`;
+      paintDots();
+      restart();
+    };
+
+    const buildDots = () => {
+      dots.innerHTML = "";
+      const pages = maxIdx() + 1;
+      if (slideCount() <= 1) return;
+      for (let i = 0; i < pages; i++) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.addEventListener("click", () => go(i));
+        dots.appendChild(b);
       }
-    } catch (err) {
-      console.error(err);
-      setNote("Something went wrong. Please email kanishkamps11c@gmail.com directly.", "err");
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Send my request";
-    }
+    };
+
+    if (prev) prev.addEventListener("click", () => go(idx - 1 < 0 ? maxIdx() : idx - 1));
+    if (next) next.addEventListener("click", () => go(idx + 1 > maxIdx() ? 0 : idx + 1));
+    window.addEventListener("resize", () => { buildDots(); go(Math.min(idx, maxIdx())); });
+
+    return {
+      refresh() { if (idx > maxIdx()) idx = 0; buildDots(); go(idx); },
+    };
+  }
+
+  /* =========================================================
+     REVIEWS SLIDER
+     ========================================================= */
+  const track = document.getElementById("reviewsTrack");
+  const dotsWrap = document.getElementById("reviewsDots");
+
+  const reviewSlider = makeSlider({
+    track,
+    dots: dotsWrap,
+    prev: document.getElementById("revPrev"),
+    next: document.getElementById("revNext"),
+    perView: () => 1,
+    slideSelector: ".review-slide",
+    autoMs: 5500,
   });
+
+  const renderSlider = () => {
+    const approved = reviews.filter((r) => r.approved);
+    track.innerHTML = "";
+    if (!approved.length) {
+      track.innerHTML =
+        '<div class="reviews__empty">No reviews yet — be the first to share your experience.</div>';
+      dotsWrap.innerHTML = "";
+      return;
+    }
+    approved.forEach((r) => {
+      const slide = document.createElement("div");
+      slide.className = "review-slide";
+      slide.innerHTML = `
+        <div class="review-card">
+          <div class="review-card__stars" aria-label="${r.rating} out of 5">${starHTML(r.rating)}</div>
+          <p class="review-card__text">${escapeHTML(r.text)}</p>
+          <div class="review-card__who">
+            <span class="review-card__name">${escapeHTML(r.name)}</span>
+            ${r.role ? `<span class="review-card__role">${escapeHTML(r.role)}</span>` : ""}
+          </div>
+        </div>`;
+      track.appendChild(slide);
+    });
+    reviewSlider.refresh();
+  };
+  renderSlider();
+
+  /* =========================================================
+     WHATSAPP SCREENSHOTS  (storage + slider)
+     ========================================================= */
+  const SHOTS_KEY = "iv_wa_shots";
+  const shotsTrack = document.getElementById("shotsTrack");
+  const shotsDots = document.getElementById("shotsDots");
+
+  const shotsPerView = () =>
+    window.innerWidth <= 560 ? 1 : window.innerWidth <= 920 ? 2 : 3;
+
+  const shotSlider = makeSlider({
+    track: shotsTrack,
+    dots: shotsDots,
+    prev: document.getElementById("shotPrev"),
+    next: document.getElementById("shotNext"),
+    perView: shotsPerView,
+    slideSelector: ".shot-slide",
+    autoMs: 6000,
+  });
+
+  const loadShots = () => {
+    try { return JSON.parse(localStorage.getItem(SHOTS_KEY) || "[]"); }
+    catch (e) { return []; }
+  };
+  const saveShots = (list) => localStorage.setItem(SHOTS_KEY, JSON.stringify(list));
+  let shots = loadShots();
+
+  // also pull any images listed in whatsapp-screenshots/manifest.json (optional)
+  let manifestShots = [];
+  fetch("whatsapp-screenshots/manifest.json")
+    .then((r) => (r.ok ? r.json() : { shots: [] }))
+    .then((d) => {
+      manifestShots = (d.shots || []).map((s, i) => ({
+        id: "m-" + i, src: s.src, caption: s.caption || "", fromFolder: true,
+      }));
+      renderShots();
+    })
+    .catch(() => {});
+
+  const allShots = () => [...manifestShots, ...shots];
+
+  const renderShots = () => {
+    shotsTrack.innerHTML = "";
+    const list = allShots();
+    if (!list.length) {
+      shotsTrack.innerHTML =
+        '<div class="reviews__empty">No screenshots yet — the admin can upload WhatsApp proof from the dashboard.</div>';
+      shotsDots.innerHTML = "";
+      return;
+    }
+    list.forEach((s) => {
+      const slide = document.createElement("div");
+      slide.className = "shot-slide";
+      slide.innerHTML = `
+        <figure class="shot-card">
+          <div class="shot-card__imgwrap"><img src="${s.src}" alt="WhatsApp proof screenshot" loading="lazy" /></div>
+          ${s.caption ? `<figcaption class="shot-card__cap">${escapeHTML(s.caption)}</figcaption>` : ""}
+        </figure>`;
+      shotsTrack.appendChild(slide);
+    });
+    shotSlider.refresh();
+  };
+  renderShots();
+
+  /* ---- tabs: reviews / whatsapp proof ---- */
+  document.querySelectorAll(".rev-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll(".rev-tab").forEach((t) => {
+        const on = t === tab;
+        t.classList.toggle("is-active", on);
+        t.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      document.querySelectorAll(".rev-panel").forEach((p) =>
+        p.classList.toggle("is-hidden", p.dataset.panel !== target)
+      );
+      if (target === "reviews") reviewSlider.refresh();
+      else shotSlider.refresh();
+    });
+  });
+
+  /* =========================================================
+     GENERIC SHEET (modal) OPEN/CLOSE
+     ========================================================= */
+  const openSheet = (el) => {
+    el.classList.add("is-open");
+    el.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  };
+  const closeSheet = (el) => {
+    el.classList.remove("is-open");
+    el.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  };
+  document.querySelectorAll(".sheet").forEach((sheet) => {
+    sheet.querySelectorAll("[data-close]").forEach((b) =>
+      b.addEventListener("click", () => closeSheet(sheet))
+    );
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape")
+      document.querySelectorAll(".sheet.is-open").forEach(closeSheet);
+  });
+
+  /* =========================================================
+     REQUEST DATA POPUP — open (+ optional prefilled category)
+     ========================================================= */
+  const requestSheet = document.getElementById("requestSheet");
+  function openRequest(cat) {
+    if (cat && categorySelect) {
+      [...categorySelect.options].forEach((o) => {
+        if (o.text.replace(/&amp;/g, "&") === cat) categorySelect.value = o.value;
+      });
+    }
+    if (note) { note.textContent = ""; note.className = "form__note"; }
+    openSheet(requestSheet);
+    setTimeout(() => { const n = document.getElementById("name"); if (n) n.focus(); }, 360);
+  }
+  ["heroRequestBtn", "navRequestBtn"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("click", () => openRequest());
+  });
+
+  /* =========================================================
+     REVIEW FEEDBACK SHEET
+     ========================================================= */
+  const reviewSheet = document.getElementById("reviewSheet");
+  const reviewForm = document.getElementById("reviewForm");
+  const reviewNote = document.getElementById("reviewNote");
+  const ratingInput = document.getElementById("rvRating");
+  const starBtns = document.querySelectorAll("#starInput .star");
+
+  const paintStars = (val) =>
+    starBtns.forEach((b) => b.classList.toggle("is-on", +b.dataset.val <= val));
+
+  starBtns.forEach((b) => {
+    b.addEventListener("mouseenter", () => paintStars(+b.dataset.val));
+    b.addEventListener("click", () => {
+      ratingInput.value = b.dataset.val;
+      paintStars(+b.dataset.val);
+    });
+  });
+  document.getElementById("starInput").addEventListener("mouseleave", () =>
+    paintStars(+ratingInput.value)
+  );
+
+  const openReview = () => {
+    reviewForm.reset();
+    ratingInput.value = "0";
+    paintStars(0);
+    reviewNote.textContent = "";
+    reviewNote.className = "form__note";
+    openSheet(reviewSheet);
+  };
+  document.getElementById("reviewsBtn").addEventListener("click", openReview);
+  document.getElementById("leaveReviewBtn").addEventListener("click", openReview);
+
+  reviewForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = document.getElementById("rvName");
+    const text = document.getElementById("rvText");
+    const rating = +ratingInput.value;
+    let ok = true;
+    [name, text].forEach((el) => {
+      const f = el.closest(".field");
+      const valid = el.value.trim() !== "";
+      f.classList.toggle("invalid", !valid);
+      if (!valid) ok = false;
+    });
+    if (!rating) ok = false;
+
+    if (!ok) {
+      reviewNote.textContent = rating ? "Please fill the highlighted fields." : "Please pick a star rating.";
+      reviewNote.className = "form__note is-err";
+      return;
+    }
+
+    reviews.push({
+      id: "r-" + Date.now(),
+      name: name.value.trim(),
+      role: document.getElementById("rvRole").value.trim(),
+      rating,
+      text: text.value.trim(),
+      approved: false, // awaits admin approval
+    });
+    saveReviews(reviews);
+
+    reviewNote.textContent = "Thank you! Your review was submitted and will appear after a quick check.";
+    reviewNote.className = "form__note is-ok";
+    setTimeout(() => closeSheet(reviewSheet), 1800);
+  });
+
+  /* =========================================================
+     ADMIN — login + manage reviews
+     ========================================================= */
+  const adminSheet = document.getElementById("adminSheet");
+  const adminList = document.getElementById("adminList");
+
+  const openAdmin = (e) => {
+    if (e) e.preventDefault();
+    const pw = window.prompt("Admin access — enter password:");
+    if (pw === null) return; // cancelled
+    if (pw !== ADMIN_PASSWORD) {
+      alert("Incorrect password.");
+      return;
+    }
+    renderAdmin();
+    renderAdminShots();
+    renderAdminCounts();
+    openSheet(adminSheet);
+  };
+
+  // Footer logo is the admin entry point
+  const footerBrand = document.getElementById("footerBrand");
+  if (footerBrand) footerBrand.addEventListener("click", openAdmin);
+
+  const renderAdmin = () => {
+    adminList.innerHTML = "";
+    if (!reviews.length) {
+      adminList.innerHTML = '<p class="sheet__sub">No reviews yet.</p>';
+      return;
+    }
+    // newest first
+    [...reviews].reverse().forEach((r) => {
+      const item = document.createElement("div");
+      item.className = "admin-item" + (r.approved ? "" : " is-hidden");
+      item.innerHTML = `
+        <div class="admin-item__body">
+          <div class="admin-item__top">
+            <span class="admin-item__name">${escapeHTML(r.name)}</span>
+            <span class="admin-item__stars">${starString(r.rating)}</span>
+          </div>
+          ${r.role ? `<div class="admin-item__role">${escapeHTML(r.role)}</div>` : ""}
+          <div class="admin-item__text">${escapeHTML(r.text)}</div>
+        </div>
+        <div class="admin-item__actions">
+          <label class="admin-toggle">
+            <input type="checkbox" data-act="toggle" ${r.approved ? "checked" : ""} />
+            In slider
+          </label>
+          <button class="admin-del" type="button" data-act="del">Delete</button>
+        </div>`;
+      item.querySelector('[data-act="toggle"]').addEventListener("change", (ev) => {
+        r.approved = ev.target.checked;
+        saveReviews(reviews);
+        item.classList.toggle("is-hidden", !r.approved);
+        renderSlider();
+      });
+      item.querySelector('[data-act="del"]').addEventListener("click", () => {
+        reviews = reviews.filter((x) => x.id !== r.id);
+        saveReviews(reviews);
+        renderAdmin();
+        renderSlider();
+      });
+      adminList.appendChild(item);
+    });
+  };
+
+  document.getElementById("adminAddForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = document.getElementById("adName");
+    const text = document.getElementById("adText");
+    if (!name.value.trim() || !text.value.trim()) return;
+    reviews.push({
+      id: "r-" + Date.now(),
+      name: name.value.trim(),
+      role: document.getElementById("adRole").value.trim(),
+      rating: +document.getElementById("adRating").value,
+      text: text.value.trim(),
+      approved: true, // admin-added shows immediately
+    });
+    saveReviews(reviews);
+    e.target.reset();
+    renderAdmin();
+    renderSlider();
+  });
+
+  /* =========================================================
+     ADMIN — contact details (WhatsApp number + email)
+     ========================================================= */
+  const contactForm = document.getElementById("contactForm");
+  const ctWhatsapp = document.getElementById("ctWhatsapp");
+  const ctEmail = document.getElementById("ctEmail");
+  const contactNote = document.getElementById("contactNote");
+
+  const fillContactInputs = () => {
+    if (ctWhatsapp) ctWhatsapp.value = contact.whatsapp;
+    if (ctEmail) ctEmail.value = contact.email;
+  };
+  fillContactInputs();
+
+  if (contactForm) {
+    contactForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const wa = (ctWhatsapp.value || "").replace(/\D/g, "");
+      const em = (ctEmail.value || "").trim();
+
+      if (wa.length < 8) {
+        contactNote.textContent = "Enter a valid WhatsApp number with country code (digits only).";
+        contactNote.className = "form__note is-err";
+        return;
+      }
+      if (em && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+        contactNote.textContent = "Enter a valid email address.";
+        contactNote.className = "form__note is-err";
+        return;
+      }
+
+      contact = { whatsapp: wa, email: em || DEFAULT_CONTACT.email };
+      localStorage.setItem(CONTACT_KEY, JSON.stringify(contact));
+      applyContact();
+      fillContactInputs();
+
+      contactNote.textContent = "Saved! New contact details are now live across the site.";
+      contactNote.className = "form__note is-ok";
+    });
+  }
+
+  /* =========================================================
+     ADMIN — catalog card counts
+     ========================================================= */
+  const adminCounts = document.getElementById("adminCounts");
+
+  const renderAdminCounts = () => {
+    if (!adminCounts) return;
+    adminCounts.innerHTML = "";
+    catalogCards.forEach((card) => {
+      const key = cardKey(card);
+      const countEl = card.querySelector(".card__count");
+      const title = (card.querySelector("h3") || {}).textContent || key;
+
+      const row = document.createElement("label");
+      row.className = "admin-count";
+      row.innerHTML = `<span class="admin-count__name">${escapeHTML(title)}</span>`;
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "e.g. 160k+ records";
+      input.value = cardCounts[key] != null ? cardCounts[key] : (countEl ? countEl.textContent : "");
+      input.addEventListener("input", () => {
+        cardCounts[key] = input.value;
+        localStorage.setItem(COUNTS_KEY, JSON.stringify(cardCounts));
+        if (countEl) countEl.textContent = input.value;
+      });
+
+      row.appendChild(input);
+      adminCounts.appendChild(row);
+    });
+  };
+
+  /* =========================================================
+     ADMIN — WhatsApp screenshot uploads
+     ========================================================= */
+  const adminShotsWrap = document.getElementById("adminShots");
+  const shotUpload = document.getElementById("shotUpload");
+
+  const renderAdminShots = () => {
+    adminShotsWrap.innerHTML = "";
+    if (!shots.length && !manifestShots.length) {
+      adminShotsWrap.innerHTML =
+        '<p class="admin-shots__empty">No screenshots uploaded yet.</p>';
+      return;
+    }
+    // folder images (read-only, can't delete from here)
+    manifestShots.forEach((s) => {
+      const cell = document.createElement("div");
+      cell.className = "admin-shot";
+      cell.innerHTML = `<img src="${s.src}" alt="folder screenshot" /><span class="admin-shot__del" title="From folder — edit manifest.json to remove" style="cursor:default;background:rgba(0,0,0,.45)">📁</span>`;
+      adminShotsWrap.appendChild(cell);
+    });
+    // uploaded images (deletable)
+    [...shots].reverse().forEach((s) => {
+      const cell = document.createElement("div");
+      cell.className = "admin-shot";
+      cell.innerHTML = `<img src="${s.src}" alt="uploaded screenshot" />
+        <button class="admin-shot__del" type="button" title="Delete">×</button>`;
+      cell.querySelector("button").addEventListener("click", () => {
+        shots = shots.filter((x) => x.id !== s.id);
+        saveShots(shots);
+        renderAdminShots();
+        renderShots();
+      });
+      adminShotsWrap.appendChild(cell);
+    });
+  };
+
+  // read + downscale to keep localStorage small (WhatsApp screenshots are big)
+  const readFile = (file) =>
+    new Promise((resolve) => {
+      const fr = new FileReader();
+      fr.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 820; // max longest edge
+          let { width, height } = img;
+          const scale = Math.min(1, MAX / Math.max(width, height));
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+          const cv = document.createElement("canvas");
+          cv.width = width;
+          cv.height = height;
+          cv.getContext("2d").drawImage(img, 0, 0, width, height);
+          try {
+            resolve(cv.toDataURL("image/jpeg", 0.78));
+          } catch (e) {
+            resolve(fr.result); // fallback to original
+          }
+        };
+        img.onerror = () => resolve(fr.result);
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+
+  if (shotUpload) {
+    shotUpload.addEventListener("change", async (e) => {
+      const files = [...e.target.files].filter((f) => f.type.startsWith("image/"));
+      for (const file of files) {
+        const src = await readFile(file);
+        shots.push({ id: "s-" + Date.now() + "-" + Math.round(performance.now()), src, caption: "" });
+      }
+      try {
+        saveShots(shots);
+      } catch (err) {
+        alert("Couldn't save — the browser storage may be full. Try fewer or smaller images.");
+      }
+      e.target.value = "";
+      renderAdminShots();
+      renderShots();
+    });
+  }
+
+  /* =========================================================
+     SUBSCRIBE FORM → EMAIL (hello@investorvault.in)
+     ========================================================= */
+  const subForm = document.getElementById("subscribeForm");
+  if (subForm) {
+    const subNote = document.getElementById("subNote");
+    subForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      subNote.textContent = "";
+      subNote.className = "form__note";
+
+      // honeypot
+      if (subForm.sub_company_site.value) return;
+
+      let ok = true;
+      subForm.querySelectorAll("[required]").forEach((el) => {
+        const valid = el.value.trim() !== "";
+        el.closest(".field").classList.toggle("invalid", !valid);
+        if (!valid) ok = false;
+      });
+      const email = subForm.subEmail.value.trim();
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        subForm.subEmail.closest(".field").classList.add("invalid");
+        ok = false;
+      }
+      if (!ok) {
+        subNote.textContent = "Please complete the highlighted fields.";
+        subNote.className = "form__note is-err";
+        return;
+      }
+
+      const body = [
+        "I'd like to subscribe to InvestorVault Weekly.",
+        "",
+        "Name: " + subForm.subName.value.trim(),
+        "Email: " + email,
+        "Data category: " + subForm.subCategory.value,
+        "Records per week: " + (subForm.subVolume.value.trim() || "—"),
+      ].join("\n");
+
+      const mailto =
+        "mailto:" + contact.email +
+        "?subject=" + encodeURIComponent("InvestorVault Weekly — Subscription request") +
+        "&body=" + encodeURIComponent(body);
+
+      window.location.href = mailto;
+      subNote.textContent = "Opening your email app… send the message to confirm your subscription.";
+      subNote.className = "form__note is-ok";
+    });
+
+    subForm.querySelectorAll("input,select").forEach((el) =>
+      el.addEventListener("input", () => el.closest(".field").classList.remove("invalid"))
+    );
+  }
+
+  /* small HTML escaper for user-supplied review text */
+  function escapeHTML(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
 });

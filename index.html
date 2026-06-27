@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DataVault — Verified Industry Databases for Serious Businesses</title>
-  <meta name="description" content="DataVault supplies verified, compliance-checked contact databases — doctors, investors, business owners and more. Request a tailored dataset in minutes." />
+  <title>InvestorVault — Verified Investor & Professional Databases</title>
+  <meta name="description" content="InvestorVault delivers verified investor and professional databases — HNIs, doctors, IT pros, business owners and more. 100% valid numbers & emails, same-day delivery. Request a dataset on WhatsApp." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,62 +16,68 @@
   <!-- ============ TOP BAR ============ -->
   <div class="ticker" aria-hidden="true">
     <div class="ticker__track">
-      <span>VERIFIED RECORDS &nbsp;·&nbsp; 4.2M+ &nbsp;·&nbsp;</span>
-      <span>GDPR &amp; DPDP ALIGNED &nbsp;·&nbsp;</span>
-      <span>DEDUPLICATED MONTHLY &nbsp;·&nbsp;</span>
+      <span>VERIFIED RECORDS &nbsp;·&nbsp; 12.32 LAKH+ &nbsp;·&nbsp;</span>
+      <span>100% VALID NUMBER &amp; EMAIL &nbsp;·&nbsp;</span>
+      <span>SAME-DAY DELIVERY &nbsp;·&nbsp;</span>
       <span>HUMAN-CHECKED SAMPLES &nbsp;·&nbsp;</span>
-      <span>VERIFIED RECORDS &nbsp;·&nbsp; 4.2M+ &nbsp;·&nbsp;</span>
-      <span>GDPR &amp; DPDP ALIGNED &nbsp;·&nbsp;</span>
-      <span>DEDUPLICATED MONTHLY &nbsp;·&nbsp;</span>
+      <span>VERIFIED RECORDS &nbsp;·&nbsp; 12.32 LAKH+ &nbsp;·&nbsp;</span>
+      <span>100% VALID NUMBER &amp; EMAIL &nbsp;·&nbsp;</span>
+      <span>SAME-DAY DELIVERY &nbsp;·&nbsp;</span>
       <span>HUMAN-CHECKED SAMPLES &nbsp;·&nbsp;</span>
     </div>
   </div>
 
   <!-- ============ HEADER ============ -->
   <header class="nav" id="top">
-    <a class="brand" href="#top" aria-label="DataVault home">
-      <span class="brand__mark" aria-hidden="true">
-        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-          <rect x="1.5" y="1.5" width="23" height="23" rx="5" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M7 13.2l3.4 3.4L19 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+    <a class="brand" href="#top" aria-label="InvestorVault home" id="brandLink">
+      <img src="logo.png" alt="" class="brand__img" onerror="this.style.display='none'" />
+      <span class="brand__text">
+        <span class="brand__name brand__word">Investor<span class="brand__gold">Vault</span></span>
+        <span class="brand__sub">Premium Investor &amp; Business Leads</span>
       </span>
-      <span class="brand__name">DataVault</span>
     </a>
 
     <nav class="nav__links" aria-label="Primary">
       <a href="#catalog">Databases</a>
       <a href="#process">How it works</a>
-      <a href="#trust">Why us</a>
+      <a href="#reviews">Reviews</a>
       <a href="#faq">FAQ</a>
     </nav>
 
-    <a href="#request" class="btn btn--solid nav__cta">Request data</a>
+    <button type="button" id="navRequestBtn" class="btn btn--solid nav__cta nav__cta--wa">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 1.96.51 3.78 1.4 5.37L2 22l4.85-1.27a9.86 9.86 0 0 0 5.19 1.48h.01c5.46 0 9.91-4.45 9.91-9.9C21.96 6.45 17.5 2 12.04 2zm0 17.82h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-2.88.76.77-2.81-.2-.29a8.2 8.2 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23z"/></svg>
+      WhatsApp us
+    </button>
   </header>
 
   <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="hero__grid">
       <div class="hero__copy">
-        <p class="eyebrow"><span class="dot"></span> Trusted data partner since 2014</p>
+        <p class="eyebrow"><span class="dot"></span> Trusted data partner since 2024</p>
         <h1 class="hero__title">
           The verified database
-          <em>your growth team</em>
-          has been missing.
+          <em>Investors &amp; professionals</em>
+          that drive real sales.
         </h1>
         <p class="hero__lede">
-          DataVault curates and human-verifies industry contact databases —
-          doctors, investors, founders and more — so your outreach lands with
-          the right people, not bounced inboxes.
+          Built for professionals who need reliable data, not endless spreadsheets.
+          Every database is curated to help you reach the right audience with confidence.
         </p>
 
         <div class="hero__actions">
-          <a href="#request" class="btn btn--solid btn--lg">Request a dataset</a>
-          <a href="#catalog" class="btn btn--ghost btn--lg">Browse databases</a>
+          <button type="button" id="heroRequestBtn" class="btn btn--solid btn--lg btn--wa">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 1.96.51 3.78 1.4 5.37L2 22l4.85-1.27a9.86 9.86 0 0 0 5.19 1.48h.01c5.46 0 9.91-4.45 9.91-9.9C21.96 6.45 17.5 2 12.04 2zm0 17.82h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-2.88.76.77-2.81-.2-.29a8.2 8.2 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23z"/></svg>
+            Message us on WhatsApp
+          </button>
+          <button type="button" class="btn btn--ghost btn--lg" id="reviewsBtn">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9L12 3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            Feedback &amp; Reviews
+          </button>
         </div>
 
         <div class="hero__assure">
-          <div><strong>No upfront payment.</strong> Request first — we share a free sample before you decide.</div>
+          <div><strong>100 leads a week · 100% valid number &amp; email.</strong> Tell us your target audience and filters — we deliver clean data, same day for most orders.</div>
         </div>
       </div>
 
@@ -82,37 +88,37 @@
         </div>
         <ul class="panel__stats">
           <li>
-            <span class="stat__num" data-count="4200000" data-suffix="+">0</span>
+            <span class="stat__num" data-count="12.32" data-decimals="2" data-suffix=" Lakh+">0</span>
             <span class="stat__cap">Verified records on file</span>
           </li>
           <li>
-            <span class="stat__num" data-count="98" data-suffix="%">0</span>
+            <span class="stat__num" data-count="94" data-suffix="%">0</span>
             <span class="stat__cap">Phone/email deliverability</span>
           </li>
           <li>
-            <span class="stat__num" data-count="11" data-suffix=" sectors">0</span>
-            <span class="stat__cap">Industries covered</span>
+            <span class="stat__num" data-count="8" data-suffix=" Categories">0</span>
+            <span class="stat__cap">Curated data segments</span>
           </li>
           <li>
-            <span class="stat__num" data-count="24" data-suffix="h">0</span>
-            <span class="stat__cap">Avg. sample turnaround</span>
+            <span class="stat__num stat__num--text">Pan-India</span>
+            <span class="stat__cap">Coverage &amp; reach</span>
           </li>
         </ul>
         <div class="panel__foot">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5L16 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Every batch passes a manual spot-check before it ships.
+          Every batch passes a manual spot-check before it's sent to you.
         </div>
       </aside>
     </div>
 
     <!-- logo / trust strip -->
     <div class="trustbar" aria-label="Quality standards">
-      <span>COMPLIANCE-ALIGNED</span>
-      <span>DPDP 2023</span>
-      <span>GDPR</span>
-      <span>MANUALLY SPOT-CHECKED</span>
-      <span>MONTHLY REFRESH</span>
-      <span>FREE SAMPLE FIRST</span>
+      <span>BROKING FIRMS</span>
+      <span>INSURANCE</span>
+      <span>REAL ESTATE</span>
+      <span>B2B ORGANIZATIONS</span>
+      <span>BANKING &amp; FINANCIAL SERVICES</span>
+      <span>WEALTH MANAGERS</span>
     </div>
   </section>
 
@@ -122,13 +128,22 @@
       <p class="eyebrow"><span class="dot"></span> The catalogue</p>
       <h2 class="section__title">Databases we maintain</h2>
       <p class="section__sub">
-        Pick a category below, then send a request. We reply with a free sample,
-        record count for your filters, and a quote — usually within a day.
+        Pick a category below and send a request on WhatsApp. We reply with the record
+        count for your filters and a quote — usually the same business day.
       </p>
     </div>
 
     <div class="catalog">
-      <!-- card template repeated -->
+      <article class="card" data-cat="HNIs &amp; UHNIs">
+        <div class="card__top">
+          <span class="card__icon">💎</span>
+          <span class="card__count">160k+ records</span>
+        </div>
+        <h3>HNIs &amp; UHNIs</h3>
+        <p>Angel investors, VCs, and high-net-worth individuals with verified contact and ticket-size signals.</p>
+        <button class="card__btn" type="button">Request this data →</button>
+      </article>
+
       <article class="card" data-cat="Doctors &amp; Healthcare">
         <div class="card__top">
           <span class="card__icon">🩺</span>
@@ -139,23 +154,13 @@
         <button class="card__btn" type="button">Request this data →</button>
       </article>
 
-      <article class="card" data-cat="Investors &amp; HNIs">
+      <article class="card" data-cat="Investors &amp; Traders">
         <div class="card__top">
           <span class="card__icon">📈</span>
-          <span class="card__count">160k+ records</span>
-        </div>
-        <h3>Investors &amp; HNIs</h3>
-        <p>Angel investors, VCs, and high-net-worth individuals with verified contact and ticket-size signals.</p>
-        <button class="card__btn" type="button">Request this data →</button>
-      </article>
-
-      <article class="card" data-cat="Real Estate Buyers &amp; Sellers">
-        <div class="card__top">
-          <span class="card__icon">🏢</span>
           <span class="card__count">540k+ records</span>
         </div>
-        <h3>Real Estate Leads</h3>
-        <p>Active property buyers, sellers and investors segmented by budget band and locality.</p>
+        <h3>Investors &amp; Traders</h3>
+        <p>Active investors and traders segmented by ticket size, instrument and market activity.</p>
         <button class="card__btn" type="button">Request this data →</button>
       </article>
 
@@ -179,33 +184,23 @@
         <button class="card__btn" type="button">Request this data →</button>
       </article>
 
-      <article class="card" data-cat="Finance &amp; Insurance">
+      <article class="card" data-cat="Wealth Managers &amp; Distributors">
         <div class="card__top">
           <span class="card__icon">💳</span>
-          <span class="card__count">280k+ records</span>
+          <span class="card__count">820k+ records</span>
         </div>
-        <h3>Finance &amp; Insurance</h3>
-        <p>CAs, advisors, agents and finance decision-makers verified for active outreach.</p>
+        <h3>Wealth Managers &amp; Distributors</h3>
+        <p>Mutual fund distributors, PMS/AIF distributors and chartered accountants verified for active outreach.</p>
         <button class="card__btn" type="button">Request this data →</button>
       </article>
 
-      <article class="card" data-cat="Students &amp; Education">
+      <article class="card" data-cat="Real Estate Buyers &amp; Sellers">
         <div class="card__top">
-          <span class="card__icon">🎓</span>
-          <span class="card__count">300k+ records</span>
+          <span class="card__icon">🏢</span>
+          <span class="card__count">540k+ records</span>
         </div>
-        <h3>Students &amp; Education</h3>
-        <p>Consented education-intent leads by course, city and graduation year for ed-tech &amp; coaching.</p>
-        <button class="card__btn" type="button">Request this data →</button>
-      </article>
-
-      <article class="card" data-cat="Manufacturers &amp; Wholesalers">
-        <div class="card__top">
-          <span class="card__icon">📦</span>
-          <span class="card__count">210k+ records</span>
-        </div>
-        <h3>Manufacturers &amp; Wholesalers</h3>
-        <p>Suppliers, distributors and B2B trade contacts segmented by product category and region.</p>
+        <h3>Real Estate Leads</h3>
+        <p>Active property buyers, sellers and investors segmented by budget band and locality.</p>
         <button class="card__btn" type="button">Request this data →</button>
       </article>
 
@@ -231,53 +226,93 @@
     </div>
   </section>
 
-  <!-- ============ PROCESS ============ -->
-  <section class="section section--alt" id="process">
-    <div class="section__head">
-      <p class="eyebrow"><span class="dot"></span> How it works</p>
-      <h2 class="section__title">Four steps, zero risk</h2>
+  <!-- ============ REVIEWS SLIDER ============ -->
+  <section class="section section--alt" id="reviews">
+    <div class="section__head reviews__head">
+      <div>
+        <p class="eyebrow"><span class="dot"></span> What clients say</p>
+        <h2 class="section__title">Trusted by teams that value quality</h2>
+      </div>
+      <button type="button" class="btn btn--solid" id="leaveReviewBtn">Leave a review</button>
     </div>
 
-    <ol class="steps">
+    <div class="rev-tabs" role="tablist" aria-label="Testimonial type">
+      <button class="rev-tab is-active" type="button" data-tab="reviews" role="tab" aria-selected="true">★ Reviews</button>
+      <button class="rev-tab" type="button" data-tab="shots" role="tab" aria-selected="false">WhatsApp Proof</button>
+    </div>
+
+    <!-- Reviews carousel -->
+    <div class="rev-panel" data-panel="reviews">
+      <div class="reviews">
+        <button class="reviews__arrow reviews__arrow--prev" id="revPrev" type="button" aria-label="Previous review">‹</button>
+        <div class="reviews__viewport">
+          <div class="reviews__track" id="reviewsTrack" aria-live="polite">
+            <!-- slides injected by script.js -->
+          </div>
+        </div>
+        <button class="reviews__arrow reviews__arrow--next" id="revNext" type="button" aria-label="Next review">›</button>
+      </div>
+      <div class="reviews__dots" id="reviewsDots" aria-hidden="true"></div>
+    </div>
+
+    <!-- WhatsApp screenshots carousel -->
+    <div class="rev-panel is-hidden" data-panel="shots">
+      <div class="reviews">
+        <button class="reviews__arrow reviews__arrow--prev" id="shotPrev" type="button" aria-label="Previous screenshot">‹</button>
+        <div class="reviews__viewport">
+          <div class="reviews__track shots__track" id="shotsTrack" aria-live="polite">
+            <!-- screenshot slides injected by script.js -->
+          </div>
+        </div>
+        <button class="reviews__arrow reviews__arrow--next" id="shotNext" type="button" aria-label="Next screenshot">›</button>
+      </div>
+      <div class="reviews__dots" id="shotsDots" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- ============ PROCESS ============ -->
+  <section class="section" id="process">
+    <div class="section__head">
+      <p class="eyebrow"><span class="dot"></span> How it works</p>
+      <h2 class="section__title">Three steps, zero hassle</h2>
+    </div>
+
+    <ol class="steps steps--3">
       <li class="step">
         <span class="step__no">01</span>
         <h3>Choose your data</h3>
-        <p>Select a category and tell us your filters — geography, role, budget band, volume.</p>
+        <p>Select a category and tell us your requirement — geography, role, budget band, volume.</p>
       </li>
       <li class="step">
         <span class="step__no">02</span>
-        <h3>Get a free sample</h3>
-        <p>We share a small verified sample plus the exact record count for your brief.</p>
+        <h3>Approve &amp; pay</h3>
+        <p>Confirm the category on WhatsApp, then make the one-time payment to lock your order.</p>
       </li>
       <li class="step">
         <span class="step__no">03</span>
-        <h3>Approve &amp; pay</h3>
-        <p>Happy with the sample? Confirm the quote. Only then does payment happen.</p>
-      </li>
-      <li class="step">
-        <span class="step__no">04</span>
         <h3>Receive your file</h3>
-        <p>Your clean, deduplicated dataset is delivered as a ready-to-use Excel/CSV.</p>
+        <p>Your clean, ready-to-use dataset is delivered as an Excel/CSV — same day for most orders.</p>
       </li>
     </ol>
   </section>
 
   <!-- ============ TRUST ============ -->
-  <section class="section" id="trust">
+  <section class="section section--alt" id="trust">
     <div class="trust">
       <div class="trust__copy">
-        <p class="eyebrow"><span class="dot"></span> Why teams trust DataVault</p>
-        <h2 class="section__title">We sell accuracy, not just rows.</h2>
+        <p class="eyebrow"><span class="dot"></span> Why professionals choose InvestorVault</p>
+        <h2 class="section__title">Quality isn't expensive. <em>Bad data is.</em></h2>
         <p class="section__sub">
-          Anyone can scrape a list. The difference is what happens after — and that's
-          where most data vendors quietly fail you. Here's our standard.
+          Anyone can sell a spreadsheet. InvestorVault delivers carefully curated investor and
+          professional databases built for teams that care about meaningful conversations,
+          better conversions, and results.
         </p>
 
         <ul class="trust__list">
-          <li><strong>Sample before you spend.</strong> You see real, verified records before any money changes hands.</li>
-          <li><strong>Deliverability guaranteed.</strong> Bounced or dead records inside the agreed threshold are replaced free.</li>
-          <li><strong>Compliance-aware sourcing.</strong> We align with DPDP 2023 &amp; GDPR principles and honour opt-out requests.</li>
-          <li><strong>Human spot-checks.</strong> Every batch is manually sampled before delivery — not just machine-validated.</li>
+          <li><strong>Fast &amp; secure delivery.</strong> Receive your database in Excel or CSV with secure processing and same-day delivery for most orders.</li>
+          <li><strong>Transparent &amp; fair pricing.</strong> Same price for everyone — you pay for the quality of the data, not millions of outdated records.</li>
+          <li><strong>Built for serious professionals.</strong> Trusted by wealth managers, agencies, real estate consultants, and sales teams who value quality over quantity.</li>
+          <li><strong>Dedicated support.</strong> Need custom filters or a niche audience? Our team works with you to build the right database for your requirement.</li>
         </ul>
       </div>
 
@@ -287,7 +322,7 @@
           <div class="proof__row"><span class="proof__k">Phone</span><span class="proof__v">+91 98•• ••• ••• <em class="ok">verified</em></span></div>
           <div class="proof__row"><span class="proof__k">Email</span><span class="proof__v">a.sharma@••••.in <em class="ok">deliverable</em></span></div>
           <div class="proof__row"><span class="proof__k">Region</span><span class="proof__v">Meerut, UP</span></div>
-          <div class="proof__row"><span class="proof__k">Checked</span><span class="proof__v">2 days ago</span></div>
+          <div class="proof__row"><span class="proof__k">Investment cat</span><span class="proof__v">10–25 Lakh</span></div>
         </div>
         <div class="proof proof--behind"></div>
         <div class="proof proof--behind2"></div>
@@ -295,32 +330,33 @@
     </div>
   </section>
 
-  <!-- ============ REQUEST FORM ============ -->
-  <section class="section section--form" id="request">
-    <div class="form__wrap">
-      <div class="form__intro">
-        <p class="eyebrow eyebrow--light"><span class="dot"></span> Request your data</p>
-        <h2 class="section__title">Tell us what you need.</h2>
-        <p class="section__sub section__sub--light">
-          Fill this in and our team gets it instantly. We'll reply with a free sample,
-          record count and quote — typically within 24 hours. No payment now.
-        </p>
-        <ul class="form__assurances">
-          <li>✓ Free sample before you commit</li>
-          <li>✓ Your details are never resold</li>
-          <li>✓ Reply within one business day</li>
-        </ul>
-      </div>
+  <!-- ============ REQUEST FORM (POPUP) ============ -->
+  <div class="sheet sheet--request" id="requestSheet" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="requestTitle">
+    <div class="sheet__backdrop" data-close></div>
+    <div class="sheet__panel sheet__panel--wide">
+      <button class="sheet__x" type="button" data-close aria-label="Close">×</button>
+      <p class="eyebrow"><span class="dot"></span> Request your data</p>
+      <h3 id="requestTitle" class="sheet__title">Tell us what you need</h3>
+      <p class="sheet__sub">
+        Tell us your target audience, filters, and how you'll use the data —
+        your request goes straight to our team on WhatsApp.
+      </p>
 
-      <form class="form" id="dataRequestForm" novalidate>
+      <form class="form form--sheet" id="dataRequestForm" novalidate>
         <div class="field">
           <label for="name">Full name <span>*</span></label>
           <input type="text" id="name" name="name" autocomplete="name" required placeholder="e.g. Rohan Mehta" />
         </div>
 
         <div class="field field--half">
-          <label for="phone">Phone number <span>*</span></label>
-          <input type="tel" id="phone" name="phone" autocomplete="tel" required placeholder="+91 ..." />
+          <label for="phone">WhatsApp number <span>*</span></label>
+          <div class="input-wa">
+            <span class="input-wa__icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 1.96.51 3.78 1.4 5.37L2 22l4.85-1.27a9.86 9.86 0 0 0 5.19 1.48h.01c5.46 0 9.91-4.45 9.91-9.9C21.96 6.45 17.5 2 12.04 2zm0 17.82h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-2.88.76.77-2.81-.2-.29a8.2 8.2 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42l-.48-.01c-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07s.89 2.4 1.01 2.56c.12.17 1.74 2.66 4.22 3.73.59.25 1.05.41 1.41.52.59.19 1.13.16 1.56.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg>
+            </span>
+            <input type="tel" id="phone" name="phone" autocomplete="tel" required placeholder="+91 98XXX XXXXX" />
+          </div>
+          <small class="field__hint">We'll reply to you on WhatsApp.</small>
         </div>
         <div class="field field--half">
           <label for="email">Email <span>*</span></label>
@@ -336,14 +372,13 @@
           <label for="category">Which data do you need? <span>*</span></label>
           <select id="category" name="category" required>
             <option value="" disabled selected>Select a category</option>
+            <option>HNIs &amp; UHNIs</option>
             <option>Doctors &amp; Healthcare</option>
-            <option>Investors &amp; HNIs</option>
-            <option>Real Estate Buyers &amp; Sellers</option>
+            <option>Investors &amp; Traders</option>
             <option>Business Owners / SMEs</option>
             <option>IT &amp; Tech Professionals</option>
-            <option>Finance &amp; Insurance</option>
-            <option>Students &amp; Education</option>
-            <option>Manufacturers &amp; Wholesalers</option>
+            <option>Wealth Managers &amp; Distributors</option>
+            <option>Real Estate Buyers &amp; Sellers</option>
             <option>NRI Database</option>
             <option>Custom / Other</option>
           </select>
@@ -376,9 +411,67 @@
         <input type="text" name="company_website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
         <button type="submit" class="btn btn--solid btn--lg form__submit" id="submitBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 1.96.51 3.78 1.4 5.37L2 22l4.85-1.27a9.86 9.86 0 0 0 5.19 1.48h.01c5.46 0 9.91-4.45 9.91-9.9C21.96 6.45 17.5 2 12.04 2zm5.85 14.66c-.2.58-1.2 1.11-1.67 1.18-.43.06-.97.09-1.56-.1-.36-.11-.82-.27-1.41-.52-2.48-1.07-4.1-3.56-4.22-3.73-.12-.16-1.01-1.34-1.01-2.56s.63-1.82.86-2.07c.23-.25.49-.31.66-.31l.48.01c.15 0 .36-.06.56.42.2.5.7 1.72.76 1.84.06.12.1.26.02.43-.08.16-.12.27-.25.41-.12.14-.26.32-.37.43-.12.13-.25.26-.11.51.15.25.64 1.06 1.38 1.72.94.84 1.74 1.11 1.99 1.23.25.13.4.11.54-.06.15-.16.63-.72.79-.97.17-.25.33-.21.56-.13.22.09 1.44.69 1.69.81.25.12.41.18.47.28.07.11.07.6-.14 1.18z"/></svg>
           Send my request
         </button>
         <p class="form__note" id="formNote" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ SUBSCRIBE / NEWSLETTER ============ -->
+  <section class="section section--sub" id="subscribe">
+    <div class="sub__wrap">
+      <div class="sub__copy">
+        <p class="eyebrow eyebrow--light"><span class="dot"></span> Join InvestorVault Weekly</p>
+        <h2 class="section__title">Get fresh data, every month.</h2>
+        <p class="section__sub section__sub--light">
+          Get fresh data for the next 4 weeks — all 100% verified emails and numbers.
+          Subscribe and we'll send a new chunk of curated data to your inbox on a
+          recurring basis.
+        </p>
+        <ul class="form__assurances">
+          <li>✓ 100 leads a week</li>
+          <li>✓ 100% valid number &amp; email</li>
+          <li>✓ One-time payment</li>
+        </ul>
+        <p class="sub__mailnote">Subscriptions are sent to <strong id="subMailDisplay">hello@investorvault.in</strong></p>
+      </div>
+
+      <form class="sub__form" id="subscribeForm" novalidate>
+        <div class="field">
+          <label for="subName">Full name <span>*</span></label>
+          <input type="text" id="subName" name="subName" required placeholder="e.g. Rohan Mehta" />
+        </div>
+        <div class="field">
+          <label for="subEmail">Email <span>*</span></label>
+          <input type="email" id="subEmail" name="subEmail" required placeholder="you@company.com" />
+        </div>
+        <div class="field">
+          <label for="subCategory">Which data do you want each month? <span>*</span></label>
+          <select id="subCategory" name="subCategory" required>
+            <option value="" disabled selected>Select a category</option>
+            <option>HNIs &amp; UHNIs</option>
+            <option>Doctors &amp; Healthcare</option>
+            <option>Investors &amp; Traders</option>
+            <option>Business Owners / SMEs</option>
+            <option>IT &amp; Tech Professionals</option>
+            <option>Wealth Managers &amp; Distributors</option>
+            <option>Real Estate Buyers &amp; Sellers</option>
+            <option>NRI Database</option>
+            <option>Custom / Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="subVolume">How many records per week?</label>
+          <input type="text" id="subVolume" name="subVolume" placeholder="e.g. 100 leads a week" />
+        </div>
+        <!-- honeypot -->
+        <input type="text" name="sub_company_site" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button type="submit" class="btn btn--solid btn--lg" style="width:100%">
+          ✉ Subscribe via email
+        </button>
+        <p class="form__note" id="subNote" role="status" aria-live="polite"></p>
       </form>
     </div>
   </section>
@@ -387,70 +480,196 @@
   <section class="section section--alt" id="faq">
     <div class="section__head">
       <p class="eyebrow"><span class="dot"></span> Questions</p>
-      <h2 class="section__title">Good questions, honest answers</h2>
+      <h2 class="section__title">Frequently asked questions</h2>
     </div>
 
     <div class="faq">
       <details>
-        <summary>Do I have to pay before seeing the data?</summary>
-        <p>No. We send a free verified sample and the exact record count for your filters first. You only pay once you're happy.</p>
+        <summary>What types of databases do you provide?</summary>
+        <p>We offer verified databases across multiple categories, including investors, HNIs, business owners, healthcare professionals, IT professionals, real estate, and other industry-specific segments.</p>
       </details>
       <details>
-        <summary>How fresh and accurate is the data?</summary>
-        <p>Databases are refreshed monthly, deduplicated, and manually spot-checked. We target 98%+ deliverability and replace dead records within the agreed threshold.</p>
+        <summary>How do I place an order?</summary>
+        <p>Simply choose your required category, submit your requirements, and our team will confirm the category, take payment, and get delivery to you the same day.</p>
       </details>
       <details>
-        <summary>Is this compliant?</summary>
-        <p>We source in line with DPDP 2023 and GDPR principles, honour opt-out requests, and recommend lawful, consent-based outreach. You're responsible for compliant usage in your campaigns.</p>
+        <summary>How quickly will I receive my database?</summary>
+        <p>Most orders are delivered within the same business day. Larger or custom datasets may require additional processing time.</p>
       </details>
       <details>
-        <summary>What format do I receive?</summary>
-        <p>A clean, ready-to-use Excel (.xlsx) or CSV file, structured with the fields relevant to your category.</p>
+        <summary>Can I request a custom database?</summary>
+        <p>Yes. We can build custom datasets based on your preferred industry, location, designation, company size, or other available filters.</p>
       </details>
       <details>
-        <summary>Can you build a custom list?</summary>
-        <p>Yes. Choose "Custom / Other" in the form and describe your exact target — we'll scope it and quote you.</p>
+        <summary>Who uses InvestorVault?</summary>
+        <p>Our databases are used by wealth managers, financial advisors, sales teams, recruiters, real estate consultants, marketing agencies, founders, and businesses across multiple industries.</p>
       </details>
     </div>
   </section>
 
   <!-- ============ FOOTER ============ -->
   <footer class="footer">
-    <div class="footer__grid">
-      <div>
-        <a class="brand brand--footer" href="#top">
-          <span class="brand__mark" aria-hidden="true">
-            <svg width="24" height="24" viewBox="0 0 26 26" fill="none"><rect x="1.5" y="1.5" width="23" height="23" rx="5" stroke="currentColor" stroke-width="1.6"/><path d="M7 13.2l3.4 3.4L19 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </span>
-          <span class="brand__name">DataVault</span>
-        </a>
-        <p class="footer__tag">Verified industry databases for serious businesses.</p>
-      </div>
-      <div class="footer__col">
-        <h4>Databases</h4>
-        <a href="#catalog">Doctors &amp; Healthcare</a>
-        <a href="#catalog">Investors &amp; HNIs</a>
-        <a href="#catalog">Real Estate</a>
-        <a href="#catalog">Business Owners</a>
-      </div>
-      <div class="footer__col">
-        <h4>Company</h4>
-        <a href="#trust">Why us</a>
-        <a href="#process">How it works</a>
-        <a href="#faq">FAQ</a>
-        <a href="#request">Request data</a>
-      </div>
-      <div class="footer__col">
-        <h4>Contact</h4>
-        <a href="mailto:kanishkamps11c@gmail.com">Email our team</a>
-        <a href="#request">Start a request</a>
+    <a class="footer__logo" href="#top" id="footerBrand" aria-label="InvestorVault home">
+      <img src="logo.png" alt="" />
+      <span class="footer__brandtext">
+        <span class="brand__word">Investor<span class="brand__gold">Vault</span></span>
+        <span class="footer__brandsub">Premium Investor &amp; Business Leads</span>
+      </span>
+    </a>
+
+    <p class="footer__tagline">Premium Databases for Professionals<br />Who Value Quality.</p>
+
+    <h2 class="served__title">&ldquo;Who We Served Till Now&rdquo;</h2>
+
+    <!-- moving company names -->
+    <div class="served__marquee" aria-label="Who we have served">
+      <div class="served__track">
+        <span>Broking Firms</span>
+        <span>Insurance</span>
+        <span>Real Estate</span>
+        <span>B2B Organizations</span>
+        <span>Banking &amp; Financial Services</span>
+        <span>Wealth Firms</span>
+        <span>Doctors Data</span>
+        <span>IT Employees</span>
+        <span>UHNIs Data</span>
+        <span>HNIs Data</span>
+        <span>Traders</span>
+        <span>Insurance Agents</span>
+        <!-- duplicate for seamless loop -->
+        <span>Broking Firms</span>
+        <span>Insurance</span>
+        <span>Real Estate</span>
+        <span>B2B Organizations</span>
+        <span>Banking &amp; Financial Services</span>
+        <span>Wealth Firms</span>
+        <span>Doctors Data</span>
+        <span>IT Employees</span>
+        <span>UHNIs Data</span>
+        <span>HNIs Data</span>
+        <span>Traders</span>
+        <span>Insurance Agents</span>
       </div>
     </div>
+
     <div class="footer__bottom">
-      <span>© <span id="year">2026</span> DataVault. All rights reserved.</span>
+      <span>© <span id="year">2024</span> InvestorVault. All rights reserved.</span>
       <span class="footer__legal">Data provided for lawful, consent-based outreach only.</span>
     </div>
   </footer>
+
+  <!-- ============ FLOATING WHATSAPP ============ -->
+  <a class="wa-fab" id="waFab" href="https://wa.me/918527738977?text=Hi%20InvestorVault%2C%20I%27d%20like%20to%20request%20a%20dataset." target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 1.96.51 3.78 1.4 5.37L2 22l4.85-1.27a9.86 9.86 0 0 0 5.19 1.48h.01c5.46 0 9.91-4.45 9.91-9.9C21.96 6.45 17.5 2 12.04 2zm0 17.82h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-2.88.76.77-2.81-.2-.29a8.2 8.2 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42l-.48-.01c-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07s.89 2.4 1.01 2.56c.12.17 1.74 2.66 4.22 3.73.59.25 1.05.41 1.41.52.59.19 1.13.16 1.56.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg>
+  </a>
+
+  <!-- ============ REVIEW BOTTOM SHEET ============ -->
+  <div class="sheet" id="reviewSheet" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="reviewSheetTitle">
+    <div class="sheet__backdrop" data-close></div>
+    <div class="sheet__panel">
+      <button class="sheet__x" type="button" data-close aria-label="Close">×</button>
+      <p class="eyebrow"><span class="dot"></span> Your feedback</p>
+      <h3 id="reviewSheetTitle" class="sheet__title">Share your experience</h3>
+      <p class="sheet__sub">Tell us how InvestorVault worked for you. Reviews are published after a quick check.</p>
+
+      <form id="reviewForm" novalidate>
+        <div class="field">
+          <label for="rvName">Your name <span>*</span></label>
+          <input type="text" id="rvName" name="rvName" required placeholder="e.g. Priya N." />
+        </div>
+        <div class="field">
+          <label for="rvRole">Role / Company (optional)</label>
+          <input type="text" id="rvRole" name="rvRole" placeholder="e.g. Wealth Manager, Mumbai" />
+        </div>
+        <div class="field">
+          <label>Your rating <span>*</span></label>
+          <div class="stars" id="starInput" role="radiogroup" aria-label="Rating out of 5">
+            <button type="button" class="star" data-val="1" aria-label="1 star">★</button>
+            <button type="button" class="star" data-val="2" aria-label="2 stars">★</button>
+            <button type="button" class="star" data-val="3" aria-label="3 stars">★</button>
+            <button type="button" class="star" data-val="4" aria-label="4 stars">★</button>
+            <button type="button" class="star" data-val="5" aria-label="5 stars">★</button>
+          </div>
+          <input type="hidden" id="rvRating" name="rvRating" value="0" />
+        </div>
+        <div class="field">
+          <label for="rvText">Your review <span>*</span></label>
+          <textarea id="rvText" name="rvText" rows="3" required placeholder="What did you like? How was the data quality and delivery?"></textarea>
+        </div>
+        <button type="submit" class="btn btn--solid btn--lg" style="width:100%">Submit review</button>
+        <p class="form__note" id="reviewNote" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN SHEET ============ -->
+  <div class="sheet sheet--admin" id="adminSheet" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+    <div class="sheet__backdrop" data-close></div>
+    <div class="sheet__panel sheet__panel--wide">
+      <button class="sheet__x" type="button" data-close aria-label="Close">×</button>
+      <p class="eyebrow"><span class="dot"></span> Admin · Reviews</p>
+      <h3 id="adminTitle" class="sheet__title">Manage reviews</h3>
+      <p class="sheet__sub">Toggle which reviews appear in the slider, add your own, or delete entries.</p>
+
+      <form id="adminAddForm" class="admin-add">
+        <input type="text" id="adName" placeholder="Name" required />
+        <input type="text" id="adRole" placeholder="Role / Company" />
+        <select id="adRating" aria-label="Rating">
+          <option value="5">★★★★★ (5)</option>
+          <option value="4">★★★★ (4)</option>
+          <option value="3">★★★ (3)</option>
+          <option value="2">★★ (2)</option>
+          <option value="1">★ (1)</option>
+        </select>
+        <input type="text" id="adText" placeholder="Review text" required />
+        <button type="submit" class="btn btn--solid">Add &amp; show</button>
+      </form>
+
+      <div class="admin-list" id="adminList" aria-live="polite"></div>
+
+      <hr class="admin-sep" />
+      <h4 class="admin-subhead">Database card counts</h4>
+      <p class="sheet__sub">Set the record count shown on each catalogue card. Changes apply instantly and are saved on this device.</p>
+      <div class="admin-counts" id="adminCounts" aria-live="polite"></div>
+
+      <hr class="admin-sep" />
+      <h4 class="admin-subhead">Site colour theme</h4>
+      <p class="sheet__sub">Pick an accent palette — it applies across the whole site and is saved on this device.</p>
+      <div class="theme-picker" role="group" aria-label="Colour theme">
+        <button type="button" class="theme-pick" data-theme="" style="--sw:#b3893f"><span aria-hidden="true"></span>Brass</button>
+        <button type="button" class="theme-pick" data-theme="emerald" style="--sw:#0e7c63"><span aria-hidden="true"></span>Emerald</button>
+        <button type="button" class="theme-pick" data-theme="royal" style="--sw:#7c3aed"><span aria-hidden="true"></span>Royal</button>
+        <button type="button" class="theme-pick" data-theme="sapphire" style="--sw:#2563eb"><span aria-hidden="true"></span>Sapphire</button>
+        <button type="button" class="theme-pick" data-theme="rose" style="--sw:#b03052"><span aria-hidden="true"></span>Rose</button>
+      </div>
+
+      <hr class="admin-sep" />
+      <h4 class="admin-subhead">Contact details</h4>
+      <p class="sheet__sub">Change the WhatsApp number and email used across the whole site. Saved on this device.</p>
+      <form id="contactForm" class="admin-contact">
+        <label class="admin-contact__field">
+          <span>WhatsApp number <small>(country code + number, digits only)</small></span>
+          <input type="text" id="ctWhatsapp" inputmode="numeric" placeholder="918527738977" />
+        </label>
+        <label class="admin-contact__field">
+          <span>Contact email <small>(for subscriptions)</small></span>
+          <input type="email" id="ctEmail" placeholder="hello@investorvault.in" />
+        </label>
+        <button type="submit" class="btn btn--solid">Save contact details</button>
+        <p class="form__note" id="contactNote" role="status" aria-live="polite"></p>
+      </form>
+
+      <hr class="admin-sep" />
+      <h4 class="admin-subhead">WhatsApp proof screenshots</h4>
+      <p class="sheet__sub">Upload chat screenshots — they appear under the “WhatsApp Proof” tab. Stored on this device.</p>
+      <label class="admin-upload" for="shotUpload">
+        <input type="file" id="shotUpload" accept="image/*" multiple hidden />
+        <span class="admin-upload__btn">＋ Upload screenshots</span>
+        <span class="admin-upload__hint">JPG / PNG · you can select multiple</span>
+      </label>
+      <div class="admin-shots" id="adminShots" aria-live="polite"></div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
