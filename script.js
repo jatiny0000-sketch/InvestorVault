@@ -172,13 +172,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     CATALOG CARD → OPEN REQUEST POPUP (prefilled category)
+     CATALOG CARD → WHATSAPP (or request popup for "custom")
+     A normal card opens WhatsApp with a ready-made message
+     ("I want HNI data"). Only the "Something else?" card opens
+     the full request form, since it needs a custom brief.
      ========================================================= */
   const categorySelect = document.getElementById("category");
   document.querySelectorAll(".card__btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const cat = btn.closest(".card").dataset.cat.replace(/&amp;/g, "&");
-      openRequest(cat);
+      const card = btn.closest(".card");
+      const cat = card.dataset.cat.replace(/&amp;/g, "&");
+
+      if (card.classList.contains("card--ask")) {
+        openRequest(cat);
+        return;
+      }
+
+      const name = (cardTitleEl(card) || {}).textContent.trim() || cat;
+      const msg = "Hi InvestorVault, I want the " + name +
+        " database. Please share the available records, sample and pricing.";
+      window.open(waLink(msg), "_blank", "noopener");
     });
   });
 
