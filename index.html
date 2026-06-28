@@ -133,6 +133,36 @@
       </p>
     </div>
 
+    <!-- ===== Limited-time offer banner (configured from the admin panel) ===== -->
+    <div class="offer-banner" id="offerBanner" hidden aria-label="Limited-time offer">
+      <img class="offer-banner__img" id="offerImg" src="" alt="" aria-hidden="true" />
+      <div class="offer-banner__overlay">
+        <div class="offer-banner__copy">
+          <p class="offer-banner__eyebrow"><span class="offer-banner__spark" aria-hidden="true">⚡</span> Limited-time offer</p>
+          <h3 class="offer-banner__title" id="offerTitle">Special offer</h3>
+          <p class="offer-banner__sub" id="offerSub"></p>
+        </div>
+        <div class="offer-countdown" id="offerCountdown" role="timer" aria-live="off">
+          <div class="offer-unit" data-group="days" hidden>
+            <span class="offer-unit__num" data-unit="days">00</span>
+            <span class="offer-unit__lbl">Days</span>
+          </div>
+          <div class="offer-unit">
+            <span class="offer-unit__num" data-unit="hours">00</span>
+            <span class="offer-unit__lbl">Hours</span>
+          </div>
+          <div class="offer-unit">
+            <span class="offer-unit__num" data-unit="mins">00</span>
+            <span class="offer-unit__lbl">Minutes</span>
+          </div>
+          <div class="offer-unit">
+            <span class="offer-unit__num" data-unit="secs">00</span>
+            <span class="offer-unit__lbl">Seconds</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="catalog">
       <article class="card" data-cat="HNIs &amp; UHNIs">
         <div class="card__top">
@@ -626,6 +656,39 @@
       </form>
 
       <div class="admin-list" id="adminList" aria-live="polite"></div>
+
+      <hr class="admin-sep" />
+      <h4 class="admin-subhead">Offer banner &amp; countdown</h4>
+      <p class="sheet__sub">Show a limited-time offer banner with a live countdown above the catalogue cards. Saved on this device.</p>
+      <form id="offerForm" class="admin-offer">
+        <label class="admin-offer__check">
+          <input type="checkbox" id="ofEnabled" />
+          <span>Show the offer banner on the landing page</span>
+        </label>
+        <label class="admin-contact__field">
+          <span>Headline</span>
+          <input type="text" id="ofTitle" placeholder="e.g. Monsoon Sale — 30% off every database" />
+        </label>
+        <label class="admin-contact__field">
+          <span>Sub-text <small>(optional)</small></span>
+          <input type="text" id="ofSub" placeholder="e.g. Verified leads at the lowest price of the year" />
+        </label>
+        <label class="admin-contact__field">
+          <span>Offer expires at <small>(the countdown ends here)</small></span>
+          <input type="datetime-local" id="ofExpiry" />
+        </label>
+        <label class="admin-offer__upload" for="ofImage">
+          <input type="file" id="ofImage" accept="image/*" hidden />
+          <span class="admin-upload__btn">＋ Upload banner image</span>
+          <span class="admin-upload__hint">A wide / landscape image looks best</span>
+        </label>
+        <div class="admin-offer__preview" id="ofPreview" hidden>
+          <img id="ofPreviewImg" src="" alt="Banner preview" />
+          <button type="button" class="admin-shot__del" id="ofImageDel" title="Remove image">×</button>
+        </div>
+        <button type="submit" class="btn btn--solid">Save offer banner</button>
+        <p class="form__note" id="offerNote" role="status" aria-live="polite"></p>
+      </form>
 
       <hr class="admin-sep" />
       <h4 class="admin-subhead">Database card counts</h4>

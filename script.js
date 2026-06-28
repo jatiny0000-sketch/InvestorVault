@@ -777,6 +777,174 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
+     OFFER BANNER + LIVE COUNTDOWN — editable in admin
+     ========================================================= */
+  const OFFER_KEY = "iv_offer";
+  const DEFAULT_OFFER = { enabled: false, title: "", subtitle: "", expiry: "", image: "" };
+
+  const loadOffer = () => {
+    try { return { ...DEFAULT_OFFER, ...JSON.parse(localStorage.getItem(OFFER_KEY) || "{}") }; }
+    catch (e) { return { ...DEFAULT_OFFER }; }
+  };
+  let offer = loadOffer();
+
+  const offerBanner = document.getElementById("offerBanner");
+  const offerImg = document.getElementById("offerImg");
+  const offerTitleEl = document.getElementById("offerTitle");
+  const offerSubEl = document.getElementById("offerSub");
+  const offerCountdown = document.getElementById("offerCountdown");
+  const offerDaysGroup = offerCountdown && offerCountdown.querySelector('[data-group="days"]');
+  const offerUnitEls = {
+    days: offerCountdown && offerCountdown.querySelector('[data-unit="days"]'),
+    hours: offerCountdown && offerCountdown.querySelector('[data-unit="hours"]'),
+    mins: offerCountdown && offerCountdown.querySelector('[data-unit="mins"]'),
+    secs: offerCountdown && offerCountdown.querySelector('[data-unit="secs"]'),
+  };
+  let offerTimer = null;
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+
+  const setUnit = (el, val) => {
+    if (!el) return;
+    const next = pad2(val);
+    if (el.textContent === next) return;
+    el.textContent = next;
+    el.classList.remove("is-tick");
+    void el.offsetWidth; // restart the tick animation
+    el.classList.add("is-tick");
+  };
+
+  const stopOfferTimer = () => { if (offerTimer) { clearInterval(offerTimer); offerTimer = null; } };
+
+  const hideOfferBanner = () => {
+    stopOfferTimer();
+    if (offerBanner) offerBanner.hidden = true;
+  };
+
+  const tickOffer = () => {
+    if (!offerBanner || !offer.expiry) return hideOfferBanner();
+    const end = new Date(offer.expiry).getTime();
+    if (isNaN(end)) return hideOfferBanner();
+    let diff = Math.floor((end - Date.now()) / 1000);
+    if (diff <= 0) return hideOfferBanner(); // offer has expired
+    const days = Math.floor(diff / 86400); diff -= days * 86400;
+    const hours = Math.floor(diff / 3600); diff -= hours * 3600;
+    const mins = Math.floor(diff / 60);
+    const secs = diff - mins * 60;
+    if (offerDaysGroup) offerDaysGroup.hidden = days <= 0;
+    setUnit(offerUnitEls.days, days);
+    setUnit(offerUnitEls.hours, hours);
+    setUnit(offerUnitEls.mins, mins);
+    setUnit(offerUnitEls.secs, secs);
+  };
+
+  const applyOffer = () => {
+    if (!offerBanner) return;
+    stopOfferTimer();
+    const end = offer.expiry ? new Date(offer.expiry).getTime() : NaN;
+    const live = offer.enabled && !isNaN(end) && end > Date.now();
+    if (!live) { offerBanner.hidden = true; return; }
+
+    if (offer.image) { offerImg.src = offer.image; offerImg.style.display = ""; }
+    else { offerImg.removeAttribute("src"); offerImg.style.display = "none"; }
+
+    offerTitleEl.textContent = offer.title || "Limited-time offer";
+    if (offer.subtitle) { offerSubEl.textContent = offer.subtitle; offerSubEl.style.display = ""; }
+    else { offerSubEl.textContent = ""; offerSubEl.style.display = "none"; }
+
+    offerBanner.hidden = false;
+    tickOffer();
+    offerTimer = setInterval(tickOffer, 1000);
+  };
+  applyOffer();
+
+  /* ---- admin: offer banner form ---- */
+  const offerForm = document.getElementById("offerForm");
+  const ofEnabled = document.getElementById("ofEnabled");
+  const ofTitle = document.getElementById("ofTitle");
+  const ofSub = document.getElementById("ofSub");
+  const ofExpiry = document.getElementById("ofExpiry");
+  const ofImage = document.getElementById("ofImage");
+  const ofPreview = document.getElementById("ofPreview");
+  const ofPreviewImg = document.getElementById("ofPreviewImg");
+  const ofImageDel = document.getElementById("ofImageDel");
+  const offerNote = document.getElementById("offerNote");
+  let ofPendingImage = offer.image || "";
+
+  // datetime-local needs a local "YYYY-MM-DDTHH:mm" value; convert from stored ISO
+  const toLocalInput = (iso) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 16);
+  };
+
+  const paintOfferPreview = () => {
+    if (!ofPreview) return;
+    if (ofPendingImage) { ofPreviewImg.src = ofPendingImage; ofPreview.hidden = false; }
+    else { ofPreviewImg.removeAttribute("src"); ofPreview.hidden = true; }
+  };
+
+  const fillOfferInputs = () => {
+    if (ofEnabled) ofEnabled.checked = !!offer.enabled;
+    if (ofTitle) ofTitle.value = offer.title || "";
+    if (ofSub) ofSub.value = offer.subtitle || "";
+    if (ofExpiry) ofExpiry.value = toLocalInput(offer.expiry);
+    ofPendingImage = offer.image || "";
+    paintOfferPreview();
+  };
+  fillOfferInputs();
+
+  if (ofImage) {
+    ofImage.addEventListener("change", async (e) => {
+      const file = [...e.target.files].find((f) => f.type.startsWith("image/"));
+      e.target.value = "";
+      if (!file) return;
+      ofPendingImage = await readFile(file);
+      paintOfferPreview();
+    });
+  }
+  if (ofImageDel) {
+    ofImageDel.addEventListener("click", () => { ofPendingImage = ""; paintOfferPreview(); });
+  }
+
+  if (offerForm) {
+    offerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const expISO = ofExpiry.value ? new Date(ofExpiry.value).toISOString() : "";
+      if (ofEnabled.checked) {
+        if (!expISO) {
+          offerNote.textContent = "Please choose when the offer expires.";
+          offerNote.className = "form__note is-err"; return;
+        }
+        if (new Date(expISO).getTime() <= Date.now()) {
+          offerNote.textContent = "The expiry time must be in the future.";
+          offerNote.className = "form__note is-err"; return;
+        }
+      }
+      offer = {
+        enabled: ofEnabled.checked,
+        title: ofTitle.value.trim(),
+        subtitle: ofSub.value.trim(),
+        expiry: expISO,
+        image: ofPendingImage || "",
+      };
+      try {
+        localStorage.setItem(OFFER_KEY, JSON.stringify(offer));
+      } catch (err) {
+        offerNote.textContent = "Couldn't save — the image may be too large. Try a smaller one.";
+        offerNote.className = "form__note is-err"; return;
+      }
+      applyOffer();
+      offerNote.textContent = offer.enabled
+        ? "Saved! The offer banner is now live above the catalogue."
+        : "Saved! The offer banner is hidden.";
+      offerNote.className = "form__note is-ok";
+    });
+  }
+
+  /* =========================================================
      SUBSCRIBE FORM → EMAIL (hello@investorvault.in)
      ========================================================= */
   const subForm = document.getElementById("subscribeForm");
