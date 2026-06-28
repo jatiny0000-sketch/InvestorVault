@@ -41,26 +41,64 @@ document.addEventListener("DOMContentLoaded", () => {
   applyContact();
 
   /* =========================================================
-     CATALOG CARD COUNTS — editable in admin, saved per device
+     CATALOG CARDS — fully configurable from the admin panel:
+     show/hide each card, edit its heading, and choose whether
+     it displays a record count or a price. Saved per device.
      ========================================================= */
-  const COUNTS_KEY = "iv_card_counts";
+  const COUNTS_KEY  = "iv_card_counts";   // legacy store: { cat: "160k+ records" }
+  const CARDCFG_KEY = "iv_card_config";   // { cat: {visible,title,mode,count,price} }
   const catalogCards = document.querySelectorAll(".catalog .card");
   const cardKey = (card) => card.dataset.cat || "";
+  const cardTitleEl = (card) => card.querySelector("h3");
+  const cardCountEl = (card) => card.querySelector(".card__count");
 
-  const loadCounts = () => {
-    try { return JSON.parse(localStorage.getItem(COUNTS_KEY) || "{}"); }
-    catch (e) { return {}; }
-  };
-  let cardCounts = loadCounts();
+  const loadCardConfig = () => {
+    let cfg = {};
+    try { cfg = JSON.parse(localStorage.getItem(CARDCFG_KEY) || "{}"); }
+    catch (e) { cfg = {}; }
 
-  const applyCounts = () => {
+    // One-time migration from the older counts-only store.
+    let legacy = {};
+    try { legacy = JSON.parse(localStorage.getItem(COUNTS_KEY) || "{}"); }
+    catch (e) { legacy = {}; }
+
     catalogCards.forEach((card) => {
-      const el = card.querySelector(".card__count");
-      const saved = cardCounts[cardKey(card)];
-      if (el && saved != null && saved !== "") el.textContent = saved;
+      const key = cardKey(card);
+      const saved = cfg[key] || {};
+      if (saved.count == null && legacy[key] != null) saved.count = legacy[key];
+      cfg[key] = Object.assign({
+        visible: true,
+        title: (cardTitleEl(card) || {}).textContent || key,
+        mode: "count",                                  // "count" | "price"
+        count: (cardCountEl(card) || {}).textContent || "",
+        price: "",
+      }, saved);
+    });
+    return cfg;
+  };
+  let cardConfig = loadCardConfig();
+  const saveCardConfig = () =>
+    localStorage.setItem(CARDCFG_KEY, JSON.stringify(cardConfig));
+
+  const applyCardConfig = (force) => {
+    catalogCards.forEach((card) => {
+      const cfg = cardConfig[cardKey(card)];
+      if (!cfg) return;
+      card.classList.toggle("is-off", cfg.visible === false);
+      // When toggled on from the admin panel after load, a card may still be
+      // at the pre-reveal opacity:0 — force it visible so it doesn't vanish.
+      if (force && cfg.visible !== false) card.classList.add("in");
+      const titleEl = cardTitleEl(card);
+      if (titleEl && cfg.title) titleEl.textContent = cfg.title;
+      const countEl = cardCountEl(card);
+      if (countEl) {
+        const val = cfg.mode === "price" ? cfg.price : cfg.count;
+        if (val != null && val !== "") countEl.textContent = val;
+        countEl.classList.toggle("card__count--price", cfg.mode === "price");
+      }
     });
   };
-  applyCounts();
+  applyCardConfig();
 
   /* =========================================================
      THEME TOGGLE (cycles through palettes)
@@ -663,7 +701,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================================================
-     ADMIN — catalog card counts
+     ADMIN — catalog cards (show/hide, heading, count vs price)
      ========================================================= */
   const adminCounts = document.getElementById("adminCounts");
 
@@ -672,24 +710,67 @@ document.addEventListener("DOMContentLoaded", () => {
     adminCounts.innerHTML = "";
     catalogCards.forEach((card) => {
       const key = cardKey(card);
-      const countEl = card.querySelector(".card__count");
-      const title = (card.querySelector("h3") || {}).textContent || key;
+      const cfg = cardConfig[key];
+      if (!cfg) return;
 
-      const row = document.createElement("label");
-      row.className = "admin-count";
-      row.innerHTML = `<span class="admin-count__name">${escapeHTML(title)}</span>`;
+      const row = document.createElement("div");
+      row.className = "admin-card" + (cfg.visible === false ? " is-off" : "");
+      row.innerHTML = `
+        <div class="admin-card__head">
+          <label class="admin-toggle">
+            <input type="checkbox" data-f="visible" ${cfg.visible === false ? "" : "checked"} />
+            Show card
+          </label>
+          <span class="admin-card__key">${escapeHTML(key.replace(/&amp;/g, "&"))}</span>
+        </div>
+        <label class="admin-card__field">
+          <span>Heading</span>
+          <input type="text" data-f="title" value="${escapeHTML(cfg.title || "")}" placeholder="Card title" />
+        </label>
+        <label class="admin-card__field">
+          <span>Show on card</span>
+          <select data-f="mode">
+            <option value="count">Number of records</option>
+            <option value="price">Price</option>
+          </select>
+        </label>
+        <label class="admin-card__field" data-field="count">
+          <span>Record count</span>
+          <input type="text" data-f="count" value="${escapeHTML(cfg.count || "")}" placeholder="e.g. 160k+ records" />
+        </label>
+        <label class="admin-card__field" data-field="price">
+          <span>Price</span>
+          <input type="text" data-f="price" value="${escapeHTML(cfg.price || "")}" placeholder="e.g. From ₹4,999" />
+        </label>`;
 
-      const input = document.createElement("input");
-      input.type = "text";
-      input.placeholder = "e.g. 160k+ records";
-      input.value = cardCounts[key] != null ? cardCounts[key] : (countEl ? countEl.textContent : "");
-      input.addEventListener("input", () => {
-        cardCounts[key] = input.value;
-        localStorage.setItem(COUNTS_KEY, JSON.stringify(cardCounts));
-        if (countEl) countEl.textContent = input.value;
+      const modeSel = row.querySelector('[data-f="mode"]');
+      modeSel.value = cfg.mode === "price" ? "price" : "count";
+      const countField = row.querySelector('[data-field="count"]');
+      const priceField = row.querySelector('[data-field="price"]');
+      const syncMode = () => {
+        const isPrice = modeSel.value === "price";
+        countField.hidden = isPrice;
+        priceField.hidden = !isPrice;
+      };
+      syncMode();
+
+      const commit = (changedMode) => {
+        cfg.visible = row.querySelector('[data-f="visible"]').checked;
+        cfg.title   = row.querySelector('[data-f="title"]').value;
+        cfg.mode    = modeSel.value;
+        cfg.count   = row.querySelector('[data-f="count"]').value;
+        cfg.price   = row.querySelector('[data-f="price"]').value;
+        row.classList.toggle("is-off", !cfg.visible);
+        saveCardConfig();
+        applyCardConfig(true);
+        if (changedMode) syncMode();
+      };
+
+      row.querySelectorAll("input, select").forEach((el) => {
+        const evt = (el.tagName === "SELECT" || el.type === "checkbox") ? "change" : "input";
+        el.addEventListener(evt, () => commit(el === modeSel));
       });
 
-      row.appendChild(input);
       adminCounts.appendChild(row);
     });
   };

@@ -493,19 +493,32 @@ body,.btn,.card,.step,.proof,.faq details,.form,.hero__panel,.sheet__panel{
 .admin-offer__preview .admin-shot__del{position:absolute;top:.4rem;right:.4rem}
 .admin-offer .btn{justify-self:start}
 
-/* ---------- admin: card counts ---------- */
-.admin-counts{display:grid;gap:.7rem;max-width:520px}
-.admin-count{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.8rem;font-size:.85rem;font-weight:600;color:var(--ink)}
-.admin-count__name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.admin-count input{
-  width:170px;font-family:"JetBrains Mono",monospace;font-size:.85rem;color:var(--ink);background:var(--card);
+/* ---------- admin: catalogue cards ---------- */
+.admin-counts{display:grid;gap:.85rem;max-width:560px}
+.admin-card{
+  display:grid;gap:.6rem;padding:.85rem .9rem;border:1px solid var(--line);
+  border-radius:12px;background:var(--card);transition:opacity .2s,border-color .2s;
+}
+.admin-card.is-off{opacity:.55;border-style:dashed}
+.admin-card__head{display:flex;align-items:center;justify-content:space-between;gap:.8rem}
+.admin-card__key{
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:.78rem;font-weight:600;color:var(--muted)
+}
+.admin-card__field{display:grid;gap:.3rem;font-size:.78rem;font-weight:600;color:var(--ink)}
+.admin-card__field > span{color:var(--muted)}
+.admin-card__field input,
+.admin-card__field select{
+  width:100%;font-family:"JetBrains Mono",monospace;font-size:.85rem;color:var(--ink);background:var(--paper);
   border:1px solid var(--line);border-radius:9px;padding:.55em .7em;transition:border-color .2s,box-shadow .2s;
 }
-.admin-count input:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(179,137,63,.16)}
-@media (max-width:560px){
-  .admin-count{grid-template-columns:1fr}
-  .admin-count input{width:100%}
-}
+.admin-card__field input:focus,
+.admin-card__field select:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(179,137,63,.16)}
+
+/* a card hidden from the catalogue via the admin panel */
+.card.is-off{display:none !important}
+/* price-mode pill reads a touch warmer than the record-count pill */
+.card__count--price{color:var(--ink);background:rgba(179,137,63,.18);font-weight:600}
 
 /* ---------- 3-up steps ---------- */
 .steps--3{grid-template-columns:repeat(3,1fr)}
