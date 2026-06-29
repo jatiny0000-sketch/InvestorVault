@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
       applyTheme(id);
       localStorage.setItem(THEME_KEY, id);
       // Only an admin changes the theme for everyone; visitors stay local.
-      if (isAdmin) pushRemote();
+      if (isAdmin) markDirty();
     });
   });
 
@@ -626,6 +626,13 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAdminShots();
     renderAdminCounts();
     openSheet(adminSheet);
+    dirty = false;
+    setPublish(
+      CONFIG_ENDPOINT ? "clean" : "warn",
+      CONFIG_ENDPOINT
+        ? "All changes published."
+        : "Backend not connected — changes stay on this device only."
+    );
   };
 
   // Footer logo is the admin entry point
@@ -661,14 +668,14 @@ document.addEventListener("DOMContentLoaded", () => {
       item.querySelector('[data-act="toggle"]').addEventListener("change", (ev) => {
         r.approved = ev.target.checked;
         saveReviews(reviews);
-        pushRemote();
+        markDirty();
         item.classList.toggle("is-hidden", !r.approved);
         renderSlider();
       });
       item.querySelector('[data-act="del"]').addEventListener("click", () => {
         reviews = reviews.filter((x) => x.id !== r.id);
         saveReviews(reviews);
-        pushRemote();
+        markDirty();
         renderAdmin();
         renderSlider();
       });
@@ -690,7 +697,7 @@ document.addEventListener("DOMContentLoaded", () => {
       approved: true, // admin-added shows immediately
     });
     saveReviews(reviews);
-    pushRemote();
+    markDirty();
     e.target.reset();
     renderAdmin();
     renderSlider();
@@ -731,9 +738,9 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem(CONTACT_KEY, JSON.stringify(contact));
       applyContact();
       fillContactInputs();
-      pushRemote();
+      markDirty();
 
-      contactNote.textContent = "Saved! New contact details are now live across the site.";
+      contactNote.textContent = "Applied — click “Save changes” at the bottom to publish to everyone.";
       contactNote.className = "form__note is-ok";
     });
   }
@@ -800,7 +807,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cfg.price   = row.querySelector('[data-f="price"]').value;
         row.classList.toggle("is-off", !cfg.visible);
         saveCardConfig();
-        pushRemote();
+        markDirty();
         applyCardConfig(true);
         if (changedMode) syncMode();
       };
@@ -843,7 +850,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cell.querySelector("button").addEventListener("click", () => {
         shots = shots.filter((x) => x.id !== s.id);
         saveShots(shots);
-        pushRemote();
+        markDirty();
         renderAdminShots();
         renderShots();
       });
@@ -891,7 +898,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (err) {
         alert("Couldn't save — the browser storage may be full. Try fewer or smaller images.");
       }
-      pushRemote();
+      markDirty();
       e.target.value = "";
       renderAdminShots();
       renderShots();
@@ -1058,11 +1065,11 @@ document.addEventListener("DOMContentLoaded", () => {
         offerNote.textContent = "Couldn't save — the image may be too large. Try a smaller one.";
         offerNote.className = "form__note is-err"; return;
       }
-      pushRemote();
+      markDirty();
       applyOffer();
       offerNote.textContent = offer.enabled
-        ? "Saved! The offer banner is now live above the catalogue."
-        : "Saved! The offer banner is hidden.";
+        ? "Applied — click “Save changes” at the bottom to publish to everyone."
+        : "Applied — click “Save changes” to publish (banner hidden).";
       offerNote.className = "form__note is-ok";
     });
   }
@@ -1128,8 +1135,10 @@ document.addEventListener("DOMContentLoaded", () => {
      ---------------------------------------------------------
      - On load we read localStorage instantly (no flicker), then
        fetch the shared config and re-render from it.
-     - Every admin change calls pushRemote() to save the whole
-       settings blob to the Google Sheet, so all visitors see it.
+     - Admin edits only PREVIEW on this browser and call markDirty().
+       Nothing reaches other visitors until the admin clicks the
+       "Save changes" button, which runs publishToLive() and writes
+       the whole settings blob to the Google Sheet.
      ========================================================= */
 
   // Collect the current settings into one object to publish.
@@ -1184,24 +1193,61 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Publish the full settings blob to the backend (debounced).
-  let pushTimer = null;
-  const pushRemote = () => {
-    if (!CONFIG_ENDPOINT) return; // not configured → stay per-device
-    clearTimeout(pushTimer);
-    pushTimer = setTimeout(() => {
-      fetch(CONFIG_ENDPOINT, {
-        method: "POST",
-        // text/plain keeps it a "simple" request (no CORS preflight).
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          action: "saveConfig",
-          password: ADMIN_PASSWORD,
-          config: gatherConfig(),
-        }),
-      }).catch(() => {});
-    }, 500);
+  /* ---- the "Save changes" button + unsaved-changes flag ---- */
+  let dirty = false;
+  const publishBtn = document.getElementById("publishBtn");
+  const publishStatus = document.getElementById("publishStatus");
+
+  const setPublish = (state, msg) => {
+    if (publishStatus) {
+      publishStatus.textContent = msg || "";
+      publishStatus.className = "admin-publish__status is-" + state;
+    }
+    if (publishBtn) publishBtn.disabled = state === "saving";
   };
+
+  // Called by every admin edit — just flags there are unsaved changes.
+  const markDirty = () => {
+    dirty = true;
+    if (!CONFIG_ENDPOINT) {
+      setPublish("warn", "Backend not connected — changes stay on this device only.");
+      return;
+    }
+    setPublish("dirty", "Unsaved changes — click “Save changes” to publish to everyone.");
+  };
+
+  // The real publish: pushes ALL current settings live for every visitor.
+  const publishToLive = () => {
+    if (!CONFIG_ENDPOINT) {
+      setPublish("warn", "Set CONFIG_ENDPOINT in script.js first, then re-deploy the Apps Script.");
+      return;
+    }
+    setPublish("saving", "Publishing to the live website…");
+    fetch(CONFIG_ENDPOINT, {
+      method: "POST",
+      // text/plain keeps it a "simple" request (no CORS preflight).
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: "saveConfig",
+        password: ADMIN_PASSWORD,
+        config: gatherConfig(),
+      }),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res && res.ok) {
+          dirty = false;
+          setPublish("ok", "✓ Saved — your changes are now live for everyone.");
+        } else {
+          setPublish("err", "Couldn't save: " + ((res && res.error) || "unknown error") + ".");
+        }
+      })
+      .catch(() =>
+        setPublish("err", "Couldn't reach the server. Check your connection and try again.")
+      );
+  };
+
+  if (publishBtn) publishBtn.addEventListener("click", publishToLive);
 
   // Public, append-only: a visitor's pending review.
   const submitReviewRemote = (review) => {

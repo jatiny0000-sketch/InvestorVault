@@ -677,7 +677,7 @@
 
       <hr class="admin-sep" />
       <h4 class="admin-subhead">Offer banner &amp; countdown</h4>
-      <p class="sheet__sub">Show a limited-time offer banner with a live countdown above the catalogue cards. Saved on this device.</p>
+      <p class="sheet__sub">Show a limited-time offer banner with a live countdown above the catalogue cards. Edits preview here — click “Save changes” at the bottom to publish to everyone.</p>
       <form id="offerForm" class="admin-offer">
         <label class="admin-offer__check">
           <input type="checkbox" id="ofEnabled" />
@@ -704,18 +704,18 @@
           <img id="ofPreviewImg" src="" alt="Banner preview" />
           <button type="button" class="admin-shot__del" id="ofImageDel" title="Remove image">×</button>
         </div>
-        <button type="submit" class="btn btn--solid">Save offer banner</button>
+        <button type="submit" class="btn btn--ghost">Apply offer banner</button>
         <p class="form__note" id="offerNote" role="status" aria-live="polite"></p>
       </form>
 
       <hr class="admin-sep" />
       <h4 class="admin-subhead">Database cards</h4>
-      <p class="sheet__sub">Choose which cards appear in the catalogue, edit each heading, and pick whether a card shows its number of records or a price. Changes apply instantly and are saved on this device.</p>
+      <p class="sheet__sub">Choose which cards appear in the catalogue, edit each heading, and pick whether a card shows its number of records or a price. Changes preview instantly — click “Save changes” at the bottom to publish to everyone.</p>
       <div class="admin-counts" id="adminCounts" aria-live="polite"></div>
 
       <hr class="admin-sep" />
       <h4 class="admin-subhead">Site colour theme</h4>
-      <p class="sheet__sub">Pick an accent palette — it applies across the whole site and is saved on this device.</p>
+      <p class="sheet__sub">Pick an accent palette — it applies across the whole site. Click “Save changes” at the bottom to publish it to everyone.</p>
       <div class="theme-picker" role="group" aria-label="Colour theme">
         <button type="button" class="theme-pick" data-theme="" style="--sw:#b3893f"><span aria-hidden="true"></span>Brass</button>
         <button type="button" class="theme-pick" data-theme="emerald" style="--sw:#0e7c63"><span aria-hidden="true"></span>Emerald</button>
@@ -726,7 +726,7 @@
 
       <hr class="admin-sep" />
       <h4 class="admin-subhead">Contact details</h4>
-      <p class="sheet__sub">Change the WhatsApp number and email used across the whole site. Saved on this device.</p>
+      <p class="sheet__sub">Change the WhatsApp number and email used across the whole site. Click “Save changes” at the bottom to publish to everyone.</p>
       <form id="contactForm" class="admin-contact">
         <label class="admin-contact__field">
           <span>WhatsApp number <small>(country code + number, digits only)</small></span>
@@ -736,19 +736,24 @@
           <span>Contact email <small>(for subscriptions)</small></span>
           <input type="email" id="ctEmail" placeholder="hello@investorvault.in" />
         </label>
-        <button type="submit" class="btn btn--solid">Save contact details</button>
+        <button type="submit" class="btn btn--ghost">Apply contact details</button>
         <p class="form__note" id="contactNote" role="status" aria-live="polite"></p>
       </form>
 
       <hr class="admin-sep" />
       <h4 class="admin-subhead">WhatsApp proof screenshots</h4>
-      <p class="sheet__sub">Upload chat screenshots — they appear under the “WhatsApp Proof” tab. Stored on this device.</p>
+      <p class="sheet__sub">Upload chat screenshots — they appear under the “WhatsApp Proof” tab. Click “Save changes” at the bottom to publish to everyone.</p>
       <label class="admin-upload" for="shotUpload">
         <input type="file" id="shotUpload" accept="image/*" multiple hidden />
         <span class="admin-upload__btn">＋ Upload screenshots</span>
         <span class="admin-upload__hint">JPG / PNG · you can select multiple</span>
       </label>
       <div class="admin-shots" id="adminShots" aria-live="polite"></div>
+
+      <div class="admin-publish" id="adminPublish">
+        <span class="admin-publish__status is-clean" id="publishStatus">All changes published.</span>
+        <button type="button" class="btn btn--solid" id="publishBtn">Save changes — publish live</button>
+      </div>
     </div>
   </div>
 

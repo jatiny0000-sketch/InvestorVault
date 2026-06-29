@@ -753,3 +753,16 @@ body,.btn,.card,.step,.proof,.faq details,.form,.hero__panel,.sheet__panel{
 .admin-shot__del:hover{background:#c0392b}
 .admin-shots__empty{grid-column:1 / -1;color:var(--muted);font-size:.88rem;padding:.6rem 0}
 @media(max-width:560px){.admin-shots{grid-template-columns:repeat(3,1fr)}}
+
+/* ---- Admin "Save changes" publish bar (sticky at panel bottom) ---- */
+.admin-publish{position:sticky;bottom:-2.4rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin:1.6rem -1.8rem -2.4rem;padding:1rem 1.8rem 1.2rem;background:var(--paper);border-top:1px solid var(--line);box-shadow:0 -10px 24px -16px rgba(16,26,43,.5);z-index:5}
+.admin-publish__status{font-size:.86rem;line-height:1.35;flex:1 1 220px}
+.admin-publish__status.is-clean{color:var(--muted)}
+.admin-publish__status.is-dirty{color:var(--brass);font-weight:600}
+.admin-publish__status.is-saving{color:var(--ink);font-weight:600}
+.admin-publish__status.is-ok{color:#0e7c63;font-weight:600}
+.admin-publish__status.is-warn{color:#b06b00;font-weight:600}
+.admin-publish__status.is-err{color:#c0392b;font-weight:600}
+.admin-publish .btn{flex:0 0 auto;white-space:nowrap}
+.admin-publish .btn:disabled{opacity:.6;cursor:default;transform:none}
+@media(max-width:560px){.admin-publish .btn{flex:1 1 100%}}
