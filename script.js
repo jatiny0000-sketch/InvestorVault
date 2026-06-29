@@ -11,7 +11,7 @@ const ADMIN_PASSWORD = "Fundo@987654";
    Google Sheet and goes LIVE for ALL visitors on ALL devices.
    Leave it as "" to keep the old per-device (localStorage) mode.
    --------------------------------------------------------------- */
-const CONFIG_ENDPOINT = "";
+const CONFIG_ENDPOINT = "https://script.google.com/macros/s/AKfycby9vAtH4Vc1dOKCosRIttuE2RfhR1GEBgx8ksZ-p3Jqyum9GTvUp9UbtdXUycaAlx-7vA/exec";
 
 const REVIEWS_KEY = "iv_reviews";
 const THEME_KEY = "iv_theme";
