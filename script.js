@@ -5,6 +5,14 @@
 /* Admin password to manage reviews (click the footer logo). */
 const ADMIN_PASSWORD = "Fundo@987654";
 
+/* ---------------------------------------------------------------
+   SHARED BACKEND — paste your deployed Google Apps Script "/exec"
+   Web app URL here. Once set, every admin change is saved to the
+   Google Sheet and goes LIVE for ALL visitors on ALL devices.
+   Leave it as "" to keep the old per-device (localStorage) mode.
+   --------------------------------------------------------------- */
+const CONFIG_ENDPOINT = "";
+
 const REVIEWS_KEY = "iv_reviews";
 const THEME_KEY = "iv_theme";
 const CONTACT_KEY = "iv_contact";
@@ -14,6 +22,10 @@ const DEFAULT_CONTACT = { whatsapp: "918527738977", email: "hello@investorvault.
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("year").textContent = new Date().getFullYear();
+
+  /* Set true after a correct admin password — only then do theme
+     swatch clicks publish to everyone (visitors stay local-only). */
+  let isAdmin = false;
 
   /* =========================================================
      CONTACT SETTINGS (WhatsApp + email) — editable in admin
@@ -117,6 +129,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const id = b.dataset.theme || "";
       applyTheme(id);
       localStorage.setItem(THEME_KEY, id);
+      // Only an admin changes the theme for everyone; visitors stay local.
+      if (isAdmin) pushRemote();
     });
   });
 
@@ -572,15 +586,18 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    reviews.push({
+    const newReview = {
       id: "r-" + Date.now(),
       name: name.value.trim(),
       role: document.getElementById("rvRole").value.trim(),
       rating,
       text: text.value.trim(),
       approved: false, // awaits admin approval
-    });
+    };
+    reviews.push(newReview);
     saveReviews(reviews);
+    // Send to the shared backend so the admin sees it on any device.
+    submitReviewRemote(newReview);
 
     reviewNote.textContent = "Thank you! Your review was submitted and will appear after a quick check.";
     reviewNote.className = "form__note is-ok";
@@ -601,6 +618,10 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Incorrect password.");
       return;
     }
+    isAdmin = true;
+    // Pull the latest shared settings first, so the admin edits the
+    // current live data (incl. any reviews visitors just submitted).
+    fetchRemoteConfig();
     renderAdmin();
     renderAdminShots();
     renderAdminCounts();
@@ -640,12 +661,14 @@ document.addEventListener("DOMContentLoaded", () => {
       item.querySelector('[data-act="toggle"]').addEventListener("change", (ev) => {
         r.approved = ev.target.checked;
         saveReviews(reviews);
+        pushRemote();
         item.classList.toggle("is-hidden", !r.approved);
         renderSlider();
       });
       item.querySelector('[data-act="del"]').addEventListener("click", () => {
         reviews = reviews.filter((x) => x.id !== r.id);
         saveReviews(reviews);
+        pushRemote();
         renderAdmin();
         renderSlider();
       });
@@ -667,6 +690,7 @@ document.addEventListener("DOMContentLoaded", () => {
       approved: true, // admin-added shows immediately
     });
     saveReviews(reviews);
+    pushRemote();
     e.target.reset();
     renderAdmin();
     renderSlider();
@@ -707,6 +731,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem(CONTACT_KEY, JSON.stringify(contact));
       applyContact();
       fillContactInputs();
+      pushRemote();
 
       contactNote.textContent = "Saved! New contact details are now live across the site.";
       contactNote.className = "form__note is-ok";
@@ -775,6 +800,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cfg.price   = row.querySelector('[data-f="price"]').value;
         row.classList.toggle("is-off", !cfg.visible);
         saveCardConfig();
+        pushRemote();
         applyCardConfig(true);
         if (changedMode) syncMode();
       };
@@ -817,6 +843,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cell.querySelector("button").addEventListener("click", () => {
         shots = shots.filter((x) => x.id !== s.id);
         saveShots(shots);
+        pushRemote();
         renderAdminShots();
         renderShots();
       });
@@ -864,6 +891,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (err) {
         alert("Couldn't save — the browser storage may be full. Try fewer or smaller images.");
       }
+      pushRemote();
       e.target.value = "";
       renderAdminShots();
       renderShots();
@@ -1030,6 +1058,7 @@ document.addEventListener("DOMContentLoaded", () => {
         offerNote.textContent = "Couldn't save — the image may be too large. Try a smaller one.";
         offerNote.className = "form__note is-err"; return;
       }
+      pushRemote();
       applyOffer();
       offerNote.textContent = offer.enabled
         ? "Saved! The offer banner is now live above the catalogue."
@@ -1092,6 +1121,109 @@ document.addEventListener("DOMContentLoaded", () => {
       el.addEventListener("input", () => el.closest(".field").classList.remove("invalid"))
     );
   }
+
+  /* =========================================================
+     SHARED CONFIG SYNC  (the part that makes admin changes go
+     live for EVERYONE, not just the admin's own browser)
+     ---------------------------------------------------------
+     - On load we read localStorage instantly (no flicker), then
+       fetch the shared config and re-render from it.
+     - Every admin change calls pushRemote() to save the whole
+       settings blob to the Google Sheet, so all visitors see it.
+     ========================================================= */
+
+  // Collect the current settings into one object to publish.
+  const gatherConfig = () => ({
+    contact,
+    cardConfig,
+    theme: localStorage.getItem(THEME_KEY) || "",
+    reviews,
+    shots,
+    offer,
+  });
+
+  // Apply a config object fetched from the backend to the live page.
+  const hydrateFromRemote = (cfg) => {
+    if (!cfg || typeof cfg !== "object") return;
+
+    if (cfg.contact && typeof cfg.contact === "object") {
+      contact = { ...DEFAULT_CONTACT, ...cfg.contact };
+      localStorage.setItem(CONTACT_KEY, JSON.stringify(contact));
+      applyContact();
+      fillContactInputs();
+    }
+    if (cfg.cardConfig && typeof cfg.cardConfig === "object") {
+      Object.keys(cfg.cardConfig).forEach((k) => {
+        cardConfig[k] = Object.assign({}, cardConfig[k] || {}, cfg.cardConfig[k]);
+      });
+      saveCardConfig();
+      applyCardConfig(true);
+      renderAdminCounts();
+    }
+    if (typeof cfg.theme === "string") {
+      localStorage.setItem(THEME_KEY, cfg.theme);
+      applyTheme(cfg.theme);
+    }
+    if (Array.isArray(cfg.reviews)) {
+      reviews = cfg.reviews;
+      saveReviews(reviews);
+      renderSlider();
+      renderAdmin();
+    }
+    if (Array.isArray(cfg.shots)) {
+      shots = cfg.shots;
+      saveShots(shots);
+      renderShots();
+      renderAdminShots();
+    }
+    if (cfg.offer && typeof cfg.offer === "object") {
+      offer = { ...DEFAULT_OFFER, ...cfg.offer };
+      localStorage.setItem(OFFER_KEY, JSON.stringify(offer));
+      fillOfferInputs();
+      applyOffer();
+    }
+  };
+
+  // Publish the full settings blob to the backend (debounced).
+  let pushTimer = null;
+  const pushRemote = () => {
+    if (!CONFIG_ENDPOINT) return; // not configured → stay per-device
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(() => {
+      fetch(CONFIG_ENDPOINT, {
+        method: "POST",
+        // text/plain keeps it a "simple" request (no CORS preflight).
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "saveConfig",
+          password: ADMIN_PASSWORD,
+          config: gatherConfig(),
+        }),
+      }).catch(() => {});
+    }, 500);
+  };
+
+  // Public, append-only: a visitor's pending review.
+  const submitReviewRemote = (review) => {
+    if (!CONFIG_ENDPOINT) return;
+    fetch(CONFIG_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "addReview", review }),
+    }).catch(() => {});
+  };
+
+  // Pull the shared settings and apply them.
+  const fetchRemoteConfig = () => {
+    if (!CONFIG_ENDPOINT) return;
+    fetch(CONFIG_ENDPOINT + "?action=config")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && data.ok && data.config) hydrateFromRemote(data.config);
+      })
+      .catch(() => {});
+  };
+  fetchRemoteConfig();
 
   /* small HTML escaper for user-supplied review text */
   function escapeHTML(str) {

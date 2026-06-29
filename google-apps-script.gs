@@ -1,24 +1,35 @@
 /**
- * DataVault — request handler
+ * DataVault — backend (Google Apps Script)
  * ---------------------------------------------------------
- * Receives a data request from the website form, appends a row
- * to the bound Google Sheet (your "Excel"), and emails a
- * notification to the owner.
+ * Two jobs:
+ *  1. LEADS  — receives a data request from the form, appends a
+ *              row to the Sheet and emails the owner.
+ *  2. CONFIG — stores the *shared* site settings the admin edits
+ *              (contact, catalog cards, reviews, screenshots,
+ *              offer banner, theme) so that EVERY visitor on EVERY
+ *              device sees the same live website — not just the
+ *              admin's own browser.
  *
  * SETUP (one time):
- *  1. Create a new Google Sheet. Rename tab to "Requests" (optional).
+ *  1. Create a new Google Sheet.
  *  2. Extensions ▸ Apps Script. Delete the default code, paste this in.
- *  3. Set NOTIFY_EMAIL below (already set).
+ *  3. Set NOTIFY_EMAIL + ADMIN_PASSWORD below (password MUST match
+ *     the ADMIN_PASSWORD in script.js).
  *  4. Deploy ▸ New deployment ▸ type "Web app".
  *       - Execute as: Me
  *       - Who has access: Anyone
- *  5. Copy the Web app URL → paste into script.js as ENDPOINT_URL.
- *  6. Run setupHeaders() once (from the editor) to write column titles.
+ *  5. Copy the Web app URL → paste into script.js as CONFIG_ENDPOINT.
+ *  6. (Optional) Run setupHeaders() once to write the leads header row.
  * ---------------------------------------------------------
  */
 
-var NOTIFY_EMAIL = "kanishkamps11c@gmail.com";
-var SHEET_NAME   = "Requests";
+var NOTIFY_EMAIL   = "kanishkamps11c@gmail.com";
+// MUST be identical to ADMIN_PASSWORD in script.js, or saving config fails.
+var ADMIN_PASSWORD = "Fundo@987654";
+
+var SHEET_NAME  = "Requests";   // leads tab
+var CONFIG_SHEET = "Config";    // shared-settings tab (managed automatically)
+var CONFIG_CHUNK = 45000;       // chars per cell (cells cap at 50k)
 
 var HEADERS = [
   "Timestamp", "Request ID", "Full Name", "Phone", "Email",
@@ -26,7 +37,104 @@ var HEADERS = [
   "Target Region", "Budget", "Specific Requirement", "Source Page", "Status"
 ];
 
-/** Run once from the editor to create the header row. */
+/* =========================================================
+   ROUTING
+   ========================================================= */
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var action = data.action || "";
+    if (action === "saveConfig") return handleSaveConfig(data);
+    if (action === "addReview")  return handleAddReview(data);
+    return handleRequest(data);            // default: a lead from the form
+  } catch (err) {
+    return json({ ok: false, error: String(err) });
+  }
+}
+
+function doGet(e) {
+  var action = (e && e.parameter && e.parameter.action) || "";
+  if (action === "config") {
+    return json({ ok: true, config: readConfig() });
+  }
+  return ContentService.createTextOutput("DataVault endpoint is live.");
+}
+
+/* =========================================================
+   CONFIG — shared site settings
+   ========================================================= */
+function getConfigSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(CONFIG_SHEET);
+  if (!sh) sh = ss.insertSheet(CONFIG_SHEET);
+  return sh;
+}
+
+/** Read the stored config object (parsed). Returns {} if none/invalid. */
+function readConfig() {
+  var sh = getConfigSheet();
+  var last = sh.getLastRow();
+  if (last < 1) return {};
+  var vals = sh.getRange(1, 1, last, 1).getValues();
+  var s = "";
+  for (var i = 0; i < vals.length; i++) s += vals[i][0];
+  if (!s) return {};
+  try { return JSON.parse(s); } catch (e) { return {}; }
+}
+
+/** Persist a config object, chunked down column A so big images fit. */
+function writeConfig(cfg) {
+  var sh = getConfigSheet();
+  var str = JSON.stringify(cfg || {});
+  sh.clearContents();
+  var chunks = [];
+  for (var i = 0; i < str.length; i += CONFIG_CHUNK) {
+    chunks.push([str.substr(i, CONFIG_CHUNK)]);
+  }
+  if (chunks.length) sh.getRange(1, 1, chunks.length, 1).setValues(chunks);
+}
+
+/** Admin overwrites the whole settings blob (password-gated). */
+function handleSaveConfig(data) {
+  if (data.password !== ADMIN_PASSWORD) {
+    return json({ ok: false, error: "unauthorized" });
+  }
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    writeConfig(data.config || {});
+  } finally {
+    lock.releaseLock();
+  }
+  return json({ ok: true });
+}
+
+/** Public, append-only: a visitor submits a review (awaits approval). */
+function handleAddReview(data) {
+  var r = data.review || {};
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var cfg = readConfig();
+    if (!cfg.reviews || cfg.reviews.constructor !== Array) cfg.reviews = [];
+    cfg.reviews.push({
+      id: "r-" + new Date().getTime() + "-" + Math.floor(Math.random() * 1000),
+      name: String(r.name || "").slice(0, 80),
+      role: String(r.role || "").slice(0, 80),
+      rating: Math.max(1, Math.min(5, parseInt(r.rating, 10) || 0)),
+      text: String(r.text || "").slice(0, 1000),
+      approved: false
+    });
+    writeConfig(cfg);
+  } finally {
+    lock.releaseLock();
+  }
+  return json({ ok: true });
+}
+
+/* =========================================================
+   LEADS — request form (kept from the original backend)
+   ========================================================= */
 function setupHeaders() {
   var sheet = getSheet();
   sheet.clear();
@@ -42,42 +150,32 @@ function getSheet() {
   return sheet;
 }
 
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-    var sheet = getSheet();
-    if (sheet.getLastRow() === 0) setupHeaders();
+function handleRequest(data) {
+  var sheet = getSheet();
+  if (sheet.getLastRow() === 0) setupHeaders();
 
-    var now = new Date();
-    var requestId = "DV-" + Utilities.formatDate(now, "GMT+5:30", "yyyyMMdd") +
-                    "-" + Math.floor(1000 + Math.random() * 9000);
+  var now = new Date();
+  var requestId = "DV-" + Utilities.formatDate(now, "GMT+5:30", "yyyyMMdd") +
+                  "-" + Math.floor(1000 + Math.random() * 9000);
 
-    sheet.appendRow([
-      Utilities.formatDate(now, "GMT+5:30", "yyyy-MM-dd HH:mm:ss"),
-      requestId,
-      data.name || "",
-      data.phone || "",
-      data.email || "",
-      data.occupation || "",
-      data.category || "",
-      data.quantity || "",
-      data.region || "",
-      data.budget || "",
-      data.requirement || "",
-      data.page || "",
-      "New"
-    ]);
+  sheet.appendRow([
+    Utilities.formatDate(now, "GMT+5:30", "yyyy-MM-dd HH:mm:ss"),
+    requestId,
+    data.name || "",
+    data.phone || "",
+    data.email || "",
+    data.occupation || "",
+    data.category || "",
+    data.quantity || "",
+    data.region || "",
+    data.budget || "",
+    data.requirement || "",
+    data.page || "",
+    "New"
+  ]);
 
-    sendNotification(requestId, data);
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok: true, id: requestId }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+  sendNotification(requestId, data);
+  return json({ ok: true, id: requestId });
 }
 
 function sendNotification(requestId, d) {
@@ -120,7 +218,8 @@ function row(label, value) {
   '</tr>';
 }
 
-/** Optional: lets you open the URL in a browser to confirm it's live. */
-function doGet() {
-  return ContentService.createTextOutput("DataVault endpoint is live.");
+function json(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
 }

@@ -31,10 +31,27 @@ the browser console) until you wire the backend below.
    - Click **Deploy**, copy the **Web app URL**.
 5. Open `script.js`, paste that URL into:
    ```js
-   const ENDPOINT_URL = "https://script.google.com/macros/s/XXXX/exec";
+   const CONFIG_ENDPOINT = "https://script.google.com/macros/s/XXXX/exec";
    ```
+   Make sure `ADMIN_PASSWORD` in `script.js` matches `ADMIN_PASSWORD` in
+   `google-apps-script.gs` (they must be identical).
 6. Reload the site, submit a test request. You'll see a new row in the Sheet
    and an email at **kanishkamps11c@gmail.com**.
+
+> **Re-deploy after editing the script:** Apps Script serves the *last
+> deployed version*. After any change to `google-apps-script.gs`, do
+> **Deploy ▸ Manage deployments ▸ ✎ Edit ▸ Version: New version ▸ Deploy**
+> (the `/exec` URL stays the same).
+
+## Admin changes go live for everyone
+
+Once `CONFIG_ENDPOINT` is set, every setting the admin edits (contact
+details, catalog cards, reviews, WhatsApp screenshots, the offer banner, and
+the theme) is saved to a **`Config`** tab in the same Sheet and is read by
+**every visitor on every device** on page load — so the whole website updates
+for all people, not just the admin's own browser. Visitor-submitted reviews
+are appended to the same store (pending your approval). Leave `CONFIG_ENDPOINT`
+empty to fall back to the old per-device (browser-only) behaviour.
 
 > The email's *reply-to* is set to the customer's email, so you can reply
 > straight from your inbox.
