@@ -44,6 +44,13 @@ document.addEventListener("DOMContentLoaded", () => {
     "https://wa.me/" + contact.whatsapp + "?text=" + encodeURIComponent(text);
   const phoneDisplay = () => "+" + contact.whatsapp;
 
+  /* One-tap "I'm interested" message used by the hero + nav WhatsApp CTAs. */
+  const INTEREST_MSG =
+    "Hi InvestorVault, I'm interested in your verified database. " +
+    "Please share the available records, a sample and pricing.";
+  const openWhatsApp = (text) =>
+    window.open(waLink(text || INTEREST_MSG), "_blank", "noopener");
+
   const applyContact = () => {
     const fab = document.getElementById("waFab");
     if (fab) fab.href = waLink("Hi InvestorVault, I'd like to request a dataset.");
@@ -63,6 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cardKey = (card) => card.dataset.cat || "";
   const cardTitleEl = (card) => card.querySelector("h3");
   const cardCountEl = (card) => card.querySelector(".card__count");
+  const cardDescEl = (card) => card.querySelector("p");
 
   const loadCardConfig = () => {
     let cfg = {};
@@ -81,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cfg[key] = Object.assign({
         visible: true,
         title: (cardTitleEl(card) || {}).textContent || key,
+        desc: (cardDescEl(card) || {}).textContent || "",
         mode: "count",                                  // "count" | "price"
         count: (cardCountEl(card) || {}).textContent || "",
         price: "",
@@ -102,6 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (force && cfg.visible !== false) card.classList.add("in");
       const titleEl = cardTitleEl(card);
       if (titleEl && cfg.title) titleEl.textContent = cfg.title;
+      const descEl = cardDescEl(card);
+      if (descEl && cfg.desc != null && cfg.desc !== "") descEl.textContent = cfg.desc;
       const countEl = cardCountEl(card);
       if (countEl) {
         const val = cfg.mode === "price" ? cfg.price : cfg.count;
@@ -163,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
      SCROLL REVEAL + COUNTER TRIGGER
      ========================================================= */
   const revealEls = document.querySelectorAll(
-    ".section__head, .card, .step, .trust__copy, .trust__cardstack, .hero__panel, .faq details, .reviews"
+    ".section__head, .step, .trust__copy, .trust__cardstack, .hero__panel, .faq details, .reviews"
   );
   revealEls.forEach((el) => el.classList.add("reveal"));
 
@@ -208,6 +219,79 @@ document.addEventListener("DOMContentLoaded", () => {
       window.open(waLink(msg), "_blank", "noopener");
     });
   });
+
+  /* =========================================================
+     CATALOG — horizontal scroller (arrows + drag-to-scroll)
+     ========================================================= */
+  const catalogTrack = document.getElementById("catalogTrack");
+  const catalogScroll = document.querySelector(".catalog-scroll");
+  if (catalogTrack) {
+    const stepBy = () => {
+      const card = catalogTrack.querySelector(".card:not(.is-off)");
+      const gap = parseFloat(getComputedStyle(catalogTrack).columnGap || "16") || 16;
+      return card ? card.getBoundingClientRect().width + gap : 320;
+    };
+
+    const arrows = document.querySelectorAll(".catalog__arrow");
+    const syncArrows = () => {
+      const max = catalogTrack.scrollWidth - catalogTrack.clientWidth - 2;
+      const atStart = catalogTrack.scrollLeft <= 2;
+      const atEnd = catalogTrack.scrollLeft >= max;
+      const scrollable = catalogTrack.scrollWidth > catalogTrack.clientWidth + 4;
+      arrows.forEach((a) => {
+        a.hidden = !scrollable;
+        const dir = a.dataset.dir;
+        a.disabled = (dir === "prev" && atStart) || (dir === "next" && atEnd);
+      });
+      if (catalogScroll) catalogScroll.classList.toggle("has-more", scrollable && !atEnd);
+    };
+
+    arrows.forEach((a) =>
+      a.addEventListener("click", () => {
+        catalogTrack.scrollBy({ left: (a.dataset.dir === "next" ? 1 : -1) * stepBy(), behavior: "smooth" });
+      })
+    );
+    catalogTrack.addEventListener("scroll", syncArrows, { passive: true });
+    window.addEventListener("resize", syncArrows);
+
+    /* drag / swipe to scroll */
+    let down = false, startX = 0, startLeft = 0, moved = false;
+    catalogTrack.addEventListener("pointerdown", (e) => {
+      down = true; moved = false;
+      startX = e.clientX; startLeft = catalogTrack.scrollLeft;
+      catalogTrack.classList.add("is-grabbing");
+    });
+    catalogTrack.addEventListener("pointermove", (e) => {
+      if (!down) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 4) moved = true;
+      catalogTrack.scrollLeft = startLeft - dx;
+    });
+    const endDrag = () => { down = false; catalogTrack.classList.remove("is-grabbing"); };
+    catalogTrack.addEventListener("pointerup", endDrag);
+    catalogTrack.addEventListener("pointerleave", endDrag);
+    /* swallow the click that ends a drag so it doesn't fire a card button */
+    catalogTrack.addEventListener("click", (e) => {
+      if (moved) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
+
+    syncArrows();
+    setTimeout(syncArrows, 400); // after reveal/layout settles
+
+    /* staggered entrance for the visible cards (independent of horizontal
+       position, so peeking / off-screen cards still animate in cleanly) */
+    const catIO = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        catalogTrack.querySelectorAll(".card:not(.is-off)").forEach((c, i) =>
+          c.style.setProperty("--i", i)
+        );
+        catalogTrack.classList.add("is-in");
+        catIO.unobserve(e.target);
+      });
+    }, { threshold: 0.12 });
+    catIO.observe(catalogTrack);
+  }
 
   /* =========================================================
      REQUEST FORM → WHATSAPP
@@ -527,9 +611,12 @@ document.addEventListener("DOMContentLoaded", () => {
     openSheet(requestSheet);
     setTimeout(() => { const n = document.getElementById("name"); if (n) n.focus(); }, 360);
   }
+  /* Hero + nav WhatsApp CTAs: one click straight to WhatsApp with a
+     ready-made "I'm interested" message (no form in the way). The full
+     request form is still reachable from the "Something else?" card. */
   ["heroRequestBtn", "navRequestBtn"].forEach((id) => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener("click", () => openRequest());
+    if (el) el.addEventListener("click", () => openWhatsApp(INTEREST_MSG));
   });
 
   /* =========================================================
@@ -773,6 +860,10 @@ document.addEventListener("DOMContentLoaded", () => {
           <input type="text" data-f="title" value="${escapeHTML(cfg.title || "")}" placeholder="Card title" />
         </label>
         <label class="admin-card__field">
+          <span>Description <small>(the text shown on the card)</small></span>
+          <textarea data-f="desc" rows="2" placeholder="Short description of this database">${escapeHTML(cfg.desc || "")}</textarea>
+        </label>
+        <label class="admin-card__field">
           <span>Show on card</span>
           <select data-f="mode">
             <option value="count">Number of records</option>
@@ -802,6 +893,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const commit = (changedMode) => {
         cfg.visible = row.querySelector('[data-f="visible"]').checked;
         cfg.title   = row.querySelector('[data-f="title"]').value;
+        cfg.desc    = row.querySelector('[data-f="desc"]').value;
         cfg.mode    = modeSel.value;
         cfg.count   = row.querySelector('[data-f="count"]').value;
         cfg.price   = row.querySelector('[data-f="price"]').value;
@@ -812,7 +904,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (changedMode) syncMode();
       };
 
-      row.querySelectorAll("input, select").forEach((el) => {
+      row.querySelectorAll("input, select, textarea").forEach((el) => {
         const evt = (el.tagName === "SELECT" || el.type === "checkbox") ? "change" : "input";
         el.addEventListener(evt, () => commit(el === modeSel));
       });
@@ -1281,3 +1373,217 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/'/g, "&#39;");
   }
 });
+
+/* ===========================================================
+   HERO SPOTLIGHT — a warm light + grid highlight that follows the
+   cursor, and drifts on its own when the mouse is idle. Drives the
+   --mx/--my CSS variables read by .hero__spot. Pauses off-screen
+   / on hidden tab / reduced-motion.
+   =========================================================== */
+(function heroSpotlight() {
+  const hero = document.querySelector(".hero");
+  const bg = document.getElementById("heroBg"); // .hero__bg
+  if (!hero || !bg) return;
+
+  let w = 0, h = 0;
+  const size = () => { const r = bg.getBoundingClientRect(); w = r.width; h = r.height; };
+  size();
+
+  const cur = { x: w * 0.7, y: h * 0.28 };
+  const tgt = { x: cur.x, y: cur.y };
+  const apply = () => {
+    bg.style.setProperty("--mx", cur.x + "px");
+    bg.style.setProperty("--my", cur.y + "px");
+  };
+  apply();
+
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) return; // leave the light parked, no animation
+
+  let raf = null, t = Math.random() * 10, usingMouse = false, lastMove = 0;
+
+  const loop = () => {
+    t += 0.006;
+    // when the cursor is idle (or absent), let the light drift on a slow path
+    if (!usingMouse || performance.now() - lastMove > 2600) {
+      usingMouse = false;
+      tgt.x = w * (0.5 + 0.34 * Math.cos(t));
+      tgt.y = h * (0.42 + 0.26 * Math.sin(t * 1.3));
+    }
+    cur.x += (tgt.x - cur.x) * 0.06;
+    cur.y += (tgt.y - cur.y) * 0.06;
+    apply();
+    raf = requestAnimationFrame(loop);
+  };
+
+  const start = () => { if (!raf) raf = requestAnimationFrame(loop); };
+  const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = null; } };
+
+  hero.addEventListener("pointermove", (e) => {
+    const r = bg.getBoundingClientRect();
+    tgt.x = e.clientX - r.left; tgt.y = e.clientY - r.top;
+    usingMouse = true; lastMove = performance.now();
+  });
+  window.addEventListener("resize", size);
+  document.addEventListener("visibilitychange", () => { document.hidden ? stop() : start(); });
+
+  const io = new IntersectionObserver(
+    (entries) => entries.forEach((e) => (e.isIntersecting ? start() : stop())),
+    { threshold: 0 }
+  );
+  io.observe(hero);
+})();
+
+/* ===========================================================
+   HERO 3D GEM — a faceted brass crystal (three.js) that slowly
+   rotates, floats, and parallaxes toward the cursor, ringed by
+   orbiting "data point" dots. Falls back to a CSS gem if three.js
+   can't load. Pauses off-screen / on hidden tab / reduced-motion.
+   =========================================================== */
+(function hero3D() {
+  const mount = document.getElementById("hero3d");
+  if (!mount) return;
+  const THREE = window.THREE;
+  if (!THREE) { mount.classList.add("hero__3d--fallback"); return; }
+
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let w = mount.clientWidth || 420, h = mount.clientHeight || 400;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+  camera.position.set(0, 0, 6);
+
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  } catch (e) { mount.classList.add("hero__3d--fallback"); return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(w, h);
+  mount.appendChild(renderer.domElement);
+
+  const color = (name, fb) => {
+    try {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return v ? new THREE.Color(v) : new THREE.Color(fb);
+    } catch (e) { return new THREE.Color(fb); }
+  };
+  const gold = color("--brass", "#b3893f");
+  const goldSoft = color("--brass-soft", "#d8b877");
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  // --- data globe: navy sphere + gold grid, glowing location points and
+  //     light-arcs connecting them (a live data network) ---
+  const RG = 1.85;
+  const globe = new THREE.Group();
+  globe.rotation.z = 0.38;               // tilt the axis
+  group.add(globe);
+
+  // solid inner sphere so back-facing points are hidden → reads as a real globe
+  globe.add(new THREE.Mesh(
+    new THREE.SphereGeometry(RG * 0.99, 48, 48),
+    new THREE.MeshPhongMaterial({ color: 0x0f1a2e, specular: 0x2b3d5e, shininess: 28, emissive: 0x0a1223, emissiveIntensity: 0.5 })
+  ));
+  // gold lat/long grid
+  globe.add(new THREE.Mesh(
+    new THREE.SphereGeometry(RG * 1.004, 36, 24),
+    new THREE.MeshBasicMaterial({ color: goldSoft, wireframe: true, transparent: true, opacity: 0.15 })
+  ));
+
+  const onSphere = (lat, lon, r) => new THREE.Vector3(
+    r * Math.cos(lat) * Math.cos(lon),
+    r * Math.sin(lat),
+    r * Math.cos(lat) * Math.sin(lon)
+  );
+
+  // glowing location markers
+  const markers = [], pts = [];
+  const markerGeo = new THREE.SphereGeometry(0.05, 10, 10);
+  const markerMat = new THREE.MeshBasicMaterial({ color: gold });
+  for (let i = 0; i < 32; i++) {
+    const lat = Math.asin(2 * Math.random() - 1);
+    const lon = Math.random() * Math.PI * 2;
+    const p = onSphere(lat, lon, RG);
+    pts.push(p);
+    const m = new THREE.Mesh(markerGeo, markerMat);
+    m.position.copy(p);
+    m.userData.ph = Math.random() * Math.PI * 2;
+    globe.add(m);
+    markers.push(m);
+  }
+
+  // light-arcs between markers, each with a travelling glow bead
+  const beads = [];
+  const beadMat = new THREE.MeshBasicMaterial({ color: 0xfff2d6 });
+  const beadGeo = new THREE.SphereGeometry(0.045, 8, 8);
+  for (let i = 0; i < 10; i++) {
+    const a = pts[(Math.random() * pts.length) | 0];
+    const b = pts[(Math.random() * pts.length) | 0];
+    if (a === b) continue;
+    const mid = a.clone().add(b).multiplyScalar(0.5).normalize().multiplyScalar(RG * (1.26 + Math.random() * 0.2));
+    const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
+    globe.add(new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(curve.getPoints(44)),
+      new THREE.LineBasicMaterial({ color: gold, transparent: true, opacity: 0.32 })
+    ));
+    const bead = new THREE.Mesh(beadGeo, beadMat);
+    globe.add(bead);
+    beads.push({ curve, mesh: bead, off: Math.random(), spd: 0.14 + Math.random() * 0.16 });
+  }
+
+  const updateGlobe = (dt, tt) => {
+    for (const m of markers) m.scale.setScalar(0.85 + (Math.sin(tt * 2 + m.userData.ph) * 0.5 + 0.5) * 0.9);
+    for (const b of beads) { b.off = (b.off + dt * b.spd) % 1; b.mesh.position.copy(b.curve.getPoint(b.off)); }
+  };
+
+  // lights — warm hemisphere fill + a moving-highlight key + cool rim
+  scene.add(new THREE.HemisphereLight(0xfff2d6, 0x2a1c08, 0.6));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.22));
+  const key = new THREE.DirectionalLight(0xfff4df, 0.85); key.position.set(3, 4, 5); scene.add(key);
+  const rim = new THREE.PointLight(goldSoft, 0.95, 30); rim.position.set(-4, -2, 2); scene.add(rim);
+  const cool = new THREE.PointLight(0x9db8ff, 0.45, 30); cool.position.set(2, -3, -3); scene.add(cool);
+
+  const mouse = { x: 0, y: 0 };
+  mount.addEventListener("pointermove", (e) => {
+    const r = mount.getBoundingClientRect();
+    mouse.x = (e.clientX - r.left) / r.width - 0.5;
+    mouse.y = (e.clientY - r.top) / r.height - 0.5;
+  });
+
+  const render = () => renderer.render(scene, camera);
+  let raf = null, t = 0, last = performance.now();
+  const loop = () => {
+    const now = performance.now();
+    const dt = Math.min((now - last) / 1000, 0.05); last = now;
+    t += 0.01;
+    globe.rotation.y += 0.0038;
+    group.rotation.x = Math.sin(t * 0.4) * 0.08;
+    group.position.y = Math.sin(t) * 0.1;
+    updateGlobe(dt, t);
+    camera.position.x += (mouse.x * 0.9 - camera.position.x) * 0.05;
+    camera.position.y += (-mouse.y * 0.7 - camera.position.y) * 0.05;
+    camera.lookAt(0, 0, 0);
+    render();
+    raf = requestAnimationFrame(loop);
+  };
+  const start = () => { if (!raf) raf = requestAnimationFrame(loop); };
+  const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = null; } };
+
+  const resize = () => {
+    w = mount.clientWidth || w; h = mount.clientHeight || h;
+    if (!w || !h) return;
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+    renderer.setSize(w, h); render();
+  };
+  window.addEventListener("resize", resize);
+  document.addEventListener("visibilitychange", () => { document.hidden ? stop() : start(); });
+  const io = new IntersectionObserver(
+    (entries) => entries.forEach((e) => (e.isIntersecting ? start() : stop())),
+    { threshold: 0 }
+  );
+  io.observe(mount);
+
+  resize();
+  if (reduce) { updateGlobe(0, 0.5); render(); } else start();
+})();

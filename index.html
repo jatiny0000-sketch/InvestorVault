@@ -26,7 +26,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -70,21 +70,23 @@
 
   <!-- ============ HERO ============ -->
   <section class="hero">
+    <div class="hero__bg" id="heroBg" aria-hidden="true">
+      <div class="hero__dots"></div>
+      <div class="hero__spot"></div>
+    </div>
     <div class="hero__grid">
       <div class="hero__copy">
-        <p class="eyebrow"><span class="dot"></span> Trusted data partner since 2024</p>
+        <p class="eyebrow"><span class="dot"></span> Verified data partner · since 2024</p>
         <h1 class="hero__title">
-          The verified database
-          <em>Investors &amp; professionals</em>
-          that drive real sales.
+          <span class="hero__line">Verified data that</span>
+          <em class="hero__line">drives real sales.</em>
         </h1>
         <p class="hero__lede">
-          Built for professionals who need reliable data, not endless spreadsheets.
-          Every database is curated to help you reach the right audience with confidence.
+          Investor &amp; professional databases — clean numbers, real emails, delivered same-day.
         </p>
 
         <div class="hero__actions">
-          <button type="button" id="heroRequestBtn" class="btn btn--solid btn--lg btn--wa">
+          <button type="button" id="heroRequestBtn" class="btn btn--solid btn--lg btn--wa btn--shine">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 1.96.51 3.78 1.4 5.37L2 22l4.85-1.27a9.86 9.86 0 0 0 5.19 1.48h.01c5.46 0 9.91-4.45 9.91-9.9C21.96 6.45 17.5 2 12.04 2zm0 17.82h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-2.88.76.77-2.81-.2-.29a8.2 8.2 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23z"/></svg>
             Message us on WhatsApp
           </button>
@@ -94,61 +96,66 @@
           </button>
         </div>
 
-        <div class="hero__assure">
-          <div><strong>100 leads a week · 100% valid number &amp; email.</strong> Tell us your target audience and filters — we deliver clean data, same day for most orders.</div>
-        </div>
+        <ul class="hero__chips" aria-label="Why buyers trust us">
+          <li class="hero__chip"><span class="hero__chip-dot hero__chip-dot--live"></span> Replies in minutes</li>
+          <li class="hero__chip"><span class="hero__chip-ic">✓</span> 100% valid number &amp; email</li>
+          <li class="hero__chip"><span class="hero__chip-ic">★</span> 4.9/5 from 120+ buyers</li>
+          <li class="hero__chip"><span class="hero__chip-ic">⚡</span> Same-day delivery</li>
+        </ul>
       </div>
 
-      <aside class="hero__panel" aria-label="Live data quality snapshot">
-        <div class="panel__head">
-          <span class="panel__label">DATA QUALITY · LIVE</span>
-          <span class="panel__pulse"></span>
-        </div>
-        <ul class="panel__stats">
-          <li>
-            <span class="stat__num" data-count="12.32" data-decimals="2" data-suffix=" Lakh+">0</span>
-            <span class="stat__cap">Verified records on file</span>
-          </li>
-          <li>
-            <span class="stat__num" data-count="94" data-suffix="%">0</span>
-            <span class="stat__cap">Phone/email deliverability</span>
-          </li>
-          <li>
-            <span class="stat__num" data-count="8" data-suffix=" Categories">0</span>
-            <span class="stat__cap">Curated data segments</span>
-          </li>
-          <li>
-            <span class="stat__num stat__num--text">Pan-India</span>
-            <span class="stat__cap">Coverage &amp; reach</span>
-          </li>
-        </ul>
-        <div class="panel__foot">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5L16 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Every batch passes a manual spot-check before it's sent to you.
+      <aside class="hero__stage" aria-label="InvestorVault — verified data">
+        <span class="hero__stage-badge"><span class="panel__pulse"></span> DATA QUALITY · LIVE</span>
+        <div class="hero__3d" id="hero3d" role="img" aria-label="3D rotating data globe with a live connection network"></div>
+        <div class="hero__stage-cap">
+          <span class="hero__stage-stat">12.32 Lakh+</span>
+          <span class="hero__stage-sub">verified records · Pan-India · manually spot-checked</span>
         </div>
       </aside>
     </div>
 
-    <!-- logo / trust strip -->
-    <div class="trustbar" aria-label="Quality standards">
-      <span>BROKING FIRMS</span>
-      <span>INSURANCE</span>
-      <span>REAL ESTATE</span>
-      <span>B2B ORGANIZATIONS</span>
-      <span>BANKING &amp; FINANCIAL SERVICES</span>
-      <span>WEALTH MANAGERS</span>
+    <!-- trusted-by strip (auto-scrolling marquee) -->
+    <div class="trustbar" aria-label="Trusted across industries">
+      <span class="trustbar__label">Trusted across</span>
+      <div class="trustbar__viewport" aria-hidden="true">
+        <div class="trustbar__track">
+          <span>Broking Firms</span>
+          <span>Insurance</span>
+          <span>Real Estate</span>
+          <span>B2B Organizations</span>
+          <span>Banking &amp; Financial Services</span>
+          <span>Wealth Managers</span>
+          <span>Investors &amp; Traders</span>
+          <span>Doctors &amp; Healthcare</span>
+          <!-- duplicate for a seamless loop -->
+          <span>Broking Firms</span>
+          <span>Insurance</span>
+          <span>Real Estate</span>
+          <span>B2B Organizations</span>
+          <span>Banking &amp; Financial Services</span>
+          <span>Wealth Managers</span>
+          <span>Investors &amp; Traders</span>
+          <span>Doctors &amp; Healthcare</span>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- ============ CATALOG ============ -->
-  <section class="section" id="catalog">
-    <div class="section__head">
-      <p class="eyebrow"><span class="dot"></span> The catalogue</p>
-      <h2 class="section__title">Databases we maintain</h2>
-      <p class="section__sub">
-        Pick a category below and send a request on WhatsApp. We reply with the record
-        count for your filters and a quote — usually the same business day.
-      </p>
+  <!-- ============ CATALOG (horizontal, right under the hero) ============ -->
+  <section class="section section--catalog" id="catalog">
+    <div class="section__head section__head--row">
+      <div class="section__headcopy">
+        <p class="eyebrow"><span class="dot"></span> The catalogue</p>
+        <h2 class="section__title">Databases we maintain</h2>
+        <p class="section__sub">
+          Tap a category to message us on WhatsApp — we reply with the record count,
+          a sample and a quote, usually the same business day.
+        </p>
+      </div>
+      <div class="catalog__nav">
+        <button type="button" class="catalog__arrow" data-dir="prev" aria-label="Scroll left" hidden>‹</button>
+        <button type="button" class="catalog__arrow" data-dir="next" aria-label="Scroll right" hidden>›</button>
+      </div>
     </div>
 
     <!-- ===== Limited-time offer banner (configured from the admin panel) ===== -->
@@ -181,7 +188,8 @@
       </div>
     </div>
 
-    <div class="catalog">
+    <div class="catalog-scroll">
+    <div class="catalog" id="catalogTrack">
       <article class="card" data-cat="HNIs &amp; UHNIs">
         <div class="card__top">
           <span class="card__icon">💎</span>
@@ -271,6 +279,8 @@
         <p>Tell us your exact target and geography — we build a custom dataset to your brief.</p>
         <button class="card__btn" type="button">Request custom data →</button>
       </article>
+      </div>
+      <span class="catalog__hint" aria-hidden="true">Drag to explore <span class="catalog__hint-arrow">→</span></span>
     </div>
   </section>
 
@@ -608,6 +618,7 @@
 
   <!-- ============ FLOATING WHATSAPP ============ -->
   <a class="wa-fab" id="waFab" href="https://wa.me/918527738977?text=Hi%20InvestorVault%2C%20I%27d%20like%20to%20request%20a%20dataset." target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">
+    <span class="wa-fab__tip">Chat with us — replies in minutes</span>
     <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 1.96.51 3.78 1.4 5.37L2 22l4.85-1.27a9.86 9.86 0 0 0 5.19 1.48h.01c5.46 0 9.91-4.45 9.91-9.9C21.96 6.45 17.5 2 12.04 2zm0 17.82h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-2.88.76.77-2.81-.2-.29a8.2 8.2 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42l-.48-.01c-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07s.89 2.4 1.01 2.56c.12.17 1.74 2.66 4.22 3.73.59.25 1.05.41 1.41.52.59.19 1.13.16 1.56.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg>
   </a>
 
@@ -757,6 +768,8 @@
     </div>
   </div>
 
+  <!-- three.js (UMD build exposes global THREE) for the hero 3D gem -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
